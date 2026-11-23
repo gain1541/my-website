@@ -111,3 +111,10 @@ a.go{color:#3b6fd6;text-decoration:none;font-weight:600}
   .field.grow{flex:0 0 auto}
   .grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
 }
+
+/* 가격 수집 전 / 판단 보류 */
+.badge.pending{background:#fff0c9;color:#9a6b00}
+.diff.pending{color:#9a6b00}
+.verdict.pending{background:#fff0c9;color:#9a6b00}
+.price.none{font-size:1.05rem;color:var(--muted);font-weight:700}
+.card.nodata{background:#fffdfb}

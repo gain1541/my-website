@@ -33,7 +33,7 @@ const brands = {
   아벤트: { tier: '중', cats: ['pacifier', 'bottle'], tagline: '쪽쪽이·젖병을 함께 파는 글로벌 브랜드', pros: ['쪽쪽이·젖병 호환 라인이 다양', '오프라인·온라인 구하기 쉬움'] },
   닥터브라운: { tier: '상', cats: ['pacifier', 'bottle'], tagline: '배앓이 방지 설계를 내세운 젖병 브랜드', pros: ['통기 시스템을 강조한 젖병', '쪽쪽이·젖병 라인 모두 보유', '부품이 많아 세척이 번거로울 수 있음'] },
   더블하트: { tier: '중', cats: ['bottle', 'pacifier'], tagline: '젖병·수유용품 전문 국내 브랜드', pros: ['모유실감 젖꼭지 라인 보유', '교체용 부품 구하기 쉬움', '국내 브랜드 중 가격대가 합리적'] },
-  컴포타: { tier: '가성비', cats: ['bottle'], tagline: '가성비 젖병 브랜드', pros: ['합리적인 가격의 PP/PPSU 젖병', '입문용으로 쓰기 좋음'] },
+  코모토모: { tier: '상', cats: ['bottle'], tagline: '실리콘 젖병으로 알려진 브랜드', pros: ['말랑한 실리콘 소재를 강조', '세척이 쉬운 구조를 내세움'] },
   몽드드: { tier: '상', cats: ['etc'], tagline: '프리미엄 물티슈', pros: ['원단 품질과 순한 성분 강조', '캡형/리필 구성 다양'] },
   베베숲: { tier: '중', cats: ['etc'], tagline: '순한 성분의 아기 물티슈', pros: ['무향·저자극을 강조', '대량 박스 구성으로 장당 단가가 낮음'] },
   아토팜: { tier: '상', cats: ['etc'], tagline: '피부 보습 전문 베이비 스킨케어', pros: ['보습 크림·로션 라인이 다양', '민감 피부용으로 인지도가 높음'] },
@@ -45,7 +45,7 @@ const brands = {
 
 const products = [];
 let pid = 1;
-const add = (p) => products.push({ id: 'p' + String(pid++).padStart(3, '0'), ...p });
+const add = (p) => products.push({ id: 'p' + String(pid++).padStart(3, '0'), ...p, name: p.name.replace(/\s+/g, ' ').trim() });
 
 // 기저귀
 const diaperStages = [
@@ -57,9 +57,9 @@ const diaperStages = [
 ];
 const diaperLines = [
   { brand: '하기스', line: '네이처메이드', base: 31000 },
-  { brand: '팸퍼스', line: '아이졸라', base: 34000 },
+  { brand: '팸퍼스', line: '프리미엄케어', base: 34000 },
   { brand: '보솜이', line: '리얼코튼', base: 24000 },
-  { brand: '군', line: '에어핏', base: 33000 },
+  { brand: '군', line: '', base: 33000 },
 ];
 for (const l of diaperLines) {
   for (const s of diaperStages) {
@@ -71,7 +71,7 @@ const pantsStages = [
   { stage: '4단계', qty: 54, f: 1.05 },
   { stage: '5단계', qty: 48, f: 1.1 },
 ];
-for (const l of [{ brand: '하기스', line: '맥스드라이', base: 29000 }, { brand: '마미포코', line: '에어핏', base: 22000 }, { brand: '팸퍼스', line: '베이비드라이', base: 32000 }]) {
+for (const l of [{ brand: '하기스', line: '맥스드라이', base: 29000 }, { brand: '마미포코', line: '', base: 22000 }, { brand: '팸퍼스', line: '베이비드라이', base: 32000 }]) {
   for (const s of pantsStages) {
     add({ cat: 'diaper', brand: l.brand, name: `${l.brand} ${l.line} 팬티형 ${s.stage}`, type: '팬티형', stage: s.stage, qty: s.qty, unit: '매', basis: 1, base: Math.round(l.base * s.f * (s.qty / 60)) });
   }
@@ -116,8 +116,8 @@ for (const l of [
   { brand: '닥터브라운', name: '닥터브라운 내추럴 플로우 젖꼭지 2P', type: '젖꼭지', base: 11000, qty: 2 },
   { brand: '아벤트', name: '아벤트 내추럴 젖병 260ml 2P', type: 'PP', base: 22000, qty: 2 },
   { brand: '아벤트', name: '아벤트 내추럴 젖꼭지 2P', type: '젖꼭지', base: 9500, qty: 2 },
-  { brand: '컴포타', name: '컴포타 PPSU 젖병 240ml 2P', type: 'PPSU', base: 18000, qty: 2 },
-  { brand: '컴포타', name: '컴포타 유리 젖병 240ml', type: '유리', base: 11000, qty: 1 },
+  { brand: '코모토모', name: '코모토모 실리콘 젖병 250ml 2P', type: '실리콘', base: 18000, qty: 2 },
+  { brand: '코모토모', name: '코모토모 유리 젖병 240ml', type: '유리', base: 11000, qty: 1 },
 ]) {
   add({ cat: 'bottle', brand: l.brand, name: l.name, type: l.type, stage: '전연령', qty: l.qty, unit: '개', basis: 1, base: l.base });
 }
@@ -177,8 +177,13 @@ for (const p of products) {
   delete p.base;
 }
 
+if (process.argv.includes('--empty')) {
+  // 제품 목록만 남기고 가격은 비웁니다 (실제 가격은 CSV로 입력)
+  dates.length = 0;
+  products.forEach((p) => { p.prices = {}; });
+}
 const out = {
-  sample: true,
+  sample: !process.argv.includes('--empty'),
   generatedAt: END.toISOString().slice(0, 10),
   dates,
   shops: shops.map(({ id, url }) => ({ id, url })),
@@ -188,3 +193,10 @@ const out = {
 const file = path.join(__dirname, '..', 'data', 'products.json');
 fs.writeFileSync(file, JSON.stringify(out));
 console.log('products:', products.length, 'bytes:', fs.statSync(file).size);
+
+if (process.argv.includes('--empty')) {
+  const lines = ['date,productId,shop,price,제품명(참고용)'];
+  for (const p of products) for (const sh of shops) lines.push(`2026-11-23,${p.id},${sh.id},,${p.name.replace(/,/g, '')}`);
+  fs.writeFileSync(path.join(__dirname, '..', 'data', 'prices_template.csv'), lines.join('\n') + '\n');
+  console.log('template rows:', lines.length - 1);
+}
