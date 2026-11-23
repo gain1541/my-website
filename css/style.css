@@ -158,3 +158,6 @@ td.r,th.r{text-align:right}
   .stick{transition:transform .2s ease}
   .stick.hide{transform:translateY(-100%)}
 }
+
+/* 쿠팡 파트너스 안내: 버튼 바로 아래, 작지만 읽을 수 있는 크기 */
+.btns .aff{flex-basis:100%;margin:0;text-align:center;font-size:.75rem;line-height:1.35;color:var(--muted)}
