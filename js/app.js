@@ -18,7 +18,15 @@
   const won = (n) => n.toLocaleString('ko-KR') + '원';
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-  const state = { cat: 'diaper', brand: new Set(), type: new Set(), stage: new Set(), judge: new Set(), q: '', sort: 'diff' };
+  const TIERS = [
+    { id: '상', label: '상 (프리미엄)' },
+    { id: '중', label: '중' },
+    { id: '가성비', label: '가성비' },
+  ];
+  const tierOf = (p) => (DB.brands[p.brand] || {}).tier;
+  const tierClass = { '상': 'hi', '중': 'mid', '가성비': 'low' };
+
+  const state = { cat: 'diaper', tier: new Set(), brand: new Set(), type: new Set(), stage: new Set(), judge: new Set(), q: '', sort: 'diff' };
   let DB = null;
 
   fetch('data/products.json')
@@ -63,21 +71,21 @@
       const b = e.target.closest('.tab');
       if (!b) return;
       state.cat = b.dataset.cat;
-      state.brand.clear(); state.type.clear(); state.stage.clear();
+      state.brand.clear(); state.type.clear(); state.stage.clear(); state.tier.clear();
       render();
     });
     $('#q').addEventListener('input', (e) => { state.q = e.target.value.trim(); renderList(); });
     $('#sort').addEventListener('change', (e) => { state.sort = e.target.value; renderList(); });
     $('#reset').addEventListener('click', () => {
-      state.brand.clear(); state.type.clear(); state.stage.clear(); state.judge.clear(); state.q = '';
+      state.brand.clear(); state.type.clear(); state.stage.clear(); state.judge.clear(); state.tier.clear(); state.q = '';
       $('#q').value = '';
       render();
     });
-    ['fBrand', 'fType', 'fStage', 'fJudge'].forEach((id) => {
+    ['fBrand', 'fTier', 'fType', 'fStage', 'fJudge'].forEach((id) => {
       $('#' + id).addEventListener('click', (e) => {
         const b = e.target.closest('.chip');
         if (!b) return;
-        const key = { fBrand: 'brand', fType: 'type', fStage: 'stage', fJudge: 'judge' }[id];
+        const key = { fBrand: 'brand', fTier: 'tier', fType: 'type', fStage: 'stage', fJudge: 'judge' }[id];
         const set = state[key];
         set.has(b.dataset.v) ? set.delete(b.dataset.v) : set.add(b.dataset.v);
         render();
@@ -105,6 +113,7 @@
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('on', t.dataset.cat === state.cat));
     const list = inCat();
     chips('fBrand', uniq(list.map((p) => p.brand)), state.brand);
+    chips('fTier', TIERS.map((t) => t.id), state.tier, (v) => TIERS.find((t) => t.id === v).label);
     chips('fType', uniq(list.map((p) => p.type)), state.type);
     const stages = uniq(list.map((p) => p.stage)).sort((a, b) => STAGE_ORDER.indexOf(a) - STAGE_ORDER.indexOf(b));
     chips('fStage', stages, state.stage);
@@ -119,7 +128,7 @@
     $('#brandInfo').innerHTML = `<h2>브랜드 특징</h2><div class="brands">` + names.map((n) => {
       const b = DB.brands[n];
       if (!b) return '';
-      return `<div class="brand"><h3>${esc(n)}</h3><div class="tag">${esc(b.tagline)}</div><ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`;
+      return `<div class="brand"><h3>${esc(n)} <span class="tier ${tierClass[b.tier]}">${esc(b.tier)}</span></h3><div class="tag">${esc(b.tagline)}</div><ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`;
     }).join('') + `</div>`;
   }
 
@@ -139,6 +148,7 @@
   function renderList() {
     let list = inCat().filter((p) => {
       if (state.brand.size && !state.brand.has(p.brand)) return false;
+      if (state.tier.size && !state.tier.has(tierOf(p))) return false;
       if (state.type.size && !state.type.has(p.type)) return false;
       if (state.stage.size && !state.stage.has(p.stage)) return false;
       if (state.judge.size && !state.judge.has(p.a.judge)) return false;
@@ -157,7 +167,7 @@
     $('#grid').innerHTML = list.map((p) => {
       const a = p.a;
       return `<button class="card" data-id="${p.id}">
-        <span class="brandname">${esc(p.brand)}</span>
+        <span class="brandname">${esc(p.brand)} <span class="tier ${tierClass[tierOf(p)]}">${esc(tierOf(p))}</span></span>
         <h3>${esc(p.name)}</h3>
         <span class="tags"><span class="tag-s">${esc(p.type)}</span>${p.stage !== '전연령' ? `<span class="tag-s">${esc(p.stage)}</span>` : ''}</span>
         <span class="meta"><span class="price">${won(a.cur)}</span><span class="badge ${a.judge}">${JL[a.judge]}</span></span>
@@ -207,7 +217,7 @@
     const shopUrl = (s) => (DB.shops.find((x) => x.id === s) || {}).url + encodeURIComponent(p.name);
     const b = DB.brands[p.brand];
     $('#mBody').innerHTML = `
-      <div class="brandname">${esc(p.brand)}</div>
+      <div class="brandname">${esc(p.brand)} <span class="tier ${tierClass[tierOf(p)]}">${esc(tierOf(p))}</span></div>
       <h2 id="mTitle">${esc(p.name)}</h2>
       <div class="verdict ${a.judge}">${verdictText}</div>
       <div class="stats">
@@ -220,7 +230,7 @@
       <table><thead><tr><th>쇼핑몰</th><th class="r">현재가</th><th class="r">평균 대비</th><th></th></tr></thead><tbody>
         ${rows.map((r) => `<tr><td>${esc(r.s)}${r.v === a.cur ? ' 🏆' : ''}</td><td class="r">${won(r.v)}</td><td class="r">${pct((r.v - a.avg) / a.avg)}</td><td class="r"><a class="go" target="_blank" rel="noopener noreferrer" href="${esc(shopUrl(r.s))}">보러가기</a></td></tr>`).join('')}
       </tbody></table>
-      ${b ? `<div class="binfo"><b>${esc(p.brand)}</b> · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}`;
+      ${b ? `<div class="binfo"><b>${esc(p.brand)}</b> <span class="tier ${tierClass[b.tier]}">${esc(b.tier)}</span> · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : ''}`;
     $('#modal').hidden = false;
     document.body.style.overflow = 'hidden';
   }

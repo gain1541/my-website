@@ -44,6 +44,10 @@ input,select{font:inherit;padding:10px 12px;border:1px solid var(--line);border-
 .card:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(120,100,140,.12)}
 .card .brandname{font-size:.8rem;color:var(--muted)}
 .card h3{margin:0;font-size:.98rem;line-height:1.35;min-height:2.7em}
+.tier{display:inline-block;font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:999px;vertical-align:middle;margin-left:4px}
+.tier.hi{background:var(--lav);color:#6b4fd1}
+.tier.mid{background:var(--sky);color:#2f62b8}
+.tier.low{background:var(--mint);color:var(--cheap)}
 .tags{display:flex;gap:4px;flex-wrap:wrap}
 .tag-s{font-size:.72rem;background:var(--lav);padding:2px 8px;border-radius:999px}
 .price{font-size:1.35rem;font-weight:800}

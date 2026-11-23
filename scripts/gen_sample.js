@@ -17,25 +17,23 @@ for (let i = 0; i < N; i++) {
 const shops = [
   { id: '쿠팡', mul: 1.0, url: 'https://www.coupang.com/np/search?q=' },
   { id: '네이버쇼핑', mul: 1.02, url: 'https://search.shopping.naver.com/search/all?query=' },
-  { id: '11번가', mul: 1.04, url: 'https://search.11st.co.kr/Search.tmall?kwd=' },
-  { id: 'G마켓', mul: 1.03, url: 'https://browse.gmarket.co.kr/search?keyword=' },
 ];
 
 const brands = {
-  하기스: { cats: ['diaper', 'wipes'], tagline: '국내 대표 기저귀 브랜드', pros: ['라인업이 다양해 단계·타입 선택 폭이 넓음', '대형마트·온라인 어디서나 구하기 쉬움', '프로모션이 잦아 가격 변동이 큰 편'] },
-  팸퍼스: { cats: ['diaper'], tagline: '글로벌 브랜드, 흡수력 강조', pros: ['흡수력·보송함을 강점으로 내세움', '신생아용 라인이 세분화되어 있음', '프리미엄 가격대'] },
-  보솜이: { cats: ['diaper'], tagline: '국내 중저가 가성비 브랜드', pros: ['상대적으로 낮은 단가', '순한 소재를 강조하는 라인 보유', '대용량 구성이 많음'] },
-  군: { cats: ['diaper'], tagline: '통기성·피부 편의를 강조하는 브랜드', pros: ['얇고 통기성 있는 설계를 강조', '피부가 예민한 아기 후기가 많음'] },
-  마미포코: { cats: ['diaper'], tagline: '가성비 팬티 기저귀', pros: ['팬티형 위주의 합리적 가격', '활동량 많은 월령에 인기'] },
-  남양: { cats: ['formula'], tagline: '임페리알XO 등 국내 대표 분유', pros: ['전 단계 라인업 보유', '국내 모유 성분 연구 기반을 강조'] },
-  매일: { cats: ['formula'], tagline: '앱솔루트 등 대표 분유', pros: ['단계별 라인업이 촘촘함', '대형 유통 채널에서 구하기 쉬움'] },
-  일동: { cats: ['formula'], tagline: '아이엠마더 등 프리미엄 분유', pros: ['성분 설계를 강조하는 라인', '프로모션·샘플 이벤트가 잦은 편'] },
-  파스퇴르: { cats: ['formula'], tagline: '유기농·청정 원유 강조', pros: ['원유 품질을 강조', '프리미엄 이미지'] },
-  몽드드: { cats: ['wipes'], tagline: '프리미엄 물티슈', pros: ['원단 품질과 순한 성분 강조', '캡형/리필 구성 다양'] },
-  베베숲: { cats: ['wipes'], tagline: '순한 성분의 아기 물티슈', pros: ['무향·저자극을 강조', '대량 박스 구성으로 장당 단가가 낮음'] },
-  더블하트: { cats: ['etc'], tagline: '젖병·수유용품 전문', pros: ['모유실감 젖꼭지 라인 보유', '교체용 부품 구하기 쉬움'] },
-  유팡: { cats: ['etc'], tagline: '젖병·세정제·케어 용품', pros: ['세정제·젖병 라인 다양', '대용량 리필 구성'] },
-  피죤: { cats: ['etc'], tagline: '세제·섬유 케어 브랜드', pros: ['아기 세탁용 라인 보유', '대용량 가성비'] },
+  하기스: { tier: '중', cats: ['diaper', 'wipes'], tagline: '국내 대표 기저귀 브랜드', pros: ['라인업이 다양해 단계·타입 선택 폭이 넓음', '대형마트·온라인 어디서나 구하기 쉬움', '프로모션이 잦아 가격 변동이 큰 편'] },
+  팸퍼스: { tier: '상', cats: ['diaper'], tagline: '글로벌 브랜드, 흡수력 강조', pros: ['흡수력·보송함을 강점으로 내세움', '신생아용 라인이 세분화되어 있음', '프리미엄 가격대'] },
+  보솜이: { tier: '가성비', cats: ['diaper'], tagline: '국내 중저가 가성비 브랜드', pros: ['상대적으로 낮은 단가', '순한 소재를 강조하는 라인 보유', '대용량 구성이 많음'] },
+  군: { tier: '상', cats: ['diaper'], tagline: '통기성·피부 편의를 강조하는 브랜드', pros: ['얇고 통기성 있는 설계를 강조', '피부가 예민한 아기 후기가 많음'] },
+  마미포코: { tier: '가성비', cats: ['diaper'], tagline: '가성비 팬티 기저귀', pros: ['팬티형 위주의 합리적 가격', '활동량 많은 월령에 인기'] },
+  남양: { tier: '중', cats: ['formula'], tagline: '임페리알XO 등 국내 대표 분유', pros: ['전 단계 라인업 보유', '국내 모유 성분 연구 기반을 강조'] },
+  매일: { tier: '중', cats: ['formula'], tagline: '앱솔루트 등 대표 분유', pros: ['단계별 라인업이 촘촘함', '대형 유통 채널에서 구하기 쉬움'] },
+  일동: { tier: '상', cats: ['formula'], tagline: '아이엠마더 등 프리미엄 분유', pros: ['성분 설계를 강조하는 라인', '프로모션·샘플 이벤트가 잦은 편'] },
+  파스퇴르: { tier: '상', cats: ['formula'], tagline: '유기농·청정 원유 강조', pros: ['원유 품질을 강조', '프리미엄 이미지'] },
+  몽드드: { tier: '상', cats: ['wipes'], tagline: '프리미엄 물티슈', pros: ['원단 품질과 순한 성분 강조', '캡형/리필 구성 다양'] },
+  베베숲: { tier: '중', cats: ['wipes'], tagline: '순한 성분의 아기 물티슈', pros: ['무향·저자극을 강조', '대량 박스 구성으로 장당 단가가 낮음'] },
+  더블하트: { tier: '중', cats: ['etc'], tagline: '젖병·수유용품 전문', pros: ['모유실감 젖꼭지 라인 보유', '교체용 부품 구하기 쉬움'] },
+  유팡: { tier: '가성비', cats: ['etc'], tagline: '젖병·세정제·케어 용품', pros: ['세정제·젖병 라인 다양', '대용량 리필 구성'] },
+  피죤: { tier: '가성비', cats: ['etc'], tagline: '세제·섬유 케어 브랜드', pros: ['아기 세탁용 라인 보유', '대용량 가성비'] },
 };
 
 const products = [];
@@ -115,7 +113,7 @@ for (const l of [
 for (const p of products) {
   const phase = rnd() * 6;
   const mood = (rnd() - 0.45) * 0.3; // 최근 가격 쏠림: -13.5% ~ +16.5%
-  const missing = rnd() < 0.3 ? Math.floor(rnd() * shops.length) : -1;
+  const missing = rnd() < 0.12 ? Math.floor(rnd() * shops.length) : -1;
   const prices = {};
   const common = [];
   let walk = 0;
