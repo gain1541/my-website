@@ -100,6 +100,26 @@ if (fs.existsSync(dataFile)) {
   }
 }
 
+// 쿠팡 파트너스에서 제공받은 상품 이미지 주소(쿠팡 이미지 서버에서 직접 불러옴, 파일을 저장해 두지 않음).
+// 사용 전 쿠팡 파트너스 약관의 이미지 사용 조건을 확인하세요. 문제가 되면 이 목록을 비우면 아이콘으로 돌아갑니다.
+const COUPANG_THUMBS = {
+  p001: 'https://t2c.coupangcdn.com/thumbnails/remote/212x212ex/image/retail/images/252547846692601-7dfdc9e5-03ca-4e03-b43b-1e5a8730a3ac.png',
+  p002: 'https://t1a.coupangcdn.com/thumbnails/remote/212x212ex/image/retail/images/253104256728657-9736fadb-5085-4583-9a98-06484aecfc9b.jpg',
+  p003: 'https://thumbnail7.coupangcdn.com/thumbnails/remote/212x212ex/image/retail/images/251672008326952-7dcf0b1f-b82b-4d55-b2b3-1f1a279cd688.jpg',
+  p022: 'https://t4a.coupangcdn.com/thumbnails/remote/212x212ex/image/retail/images/3686595414221814-4b623943-852c-40d5-b4a7-51d0d84a6d33.jpg',
+  p023: 'https://thumbnail4.coupangcdn.com/thumbnails/remote/212x212ex/image/retail/images/3066359667196221-0d5a406a-3226-4332-9c26-28b8ea900888.jpg',
+  p026: 'https://thumbnail11.coupangcdn.com/thumbnails/remote/212x212ex/image/retail/images/144496753564599-0e1b2fee-c732-4835-b3c9-a3dd57e4993d.jpg',
+  p027: 'https://thumbnail9.coupangcdn.com/thumbnails/remote/212x212ex/image/retail/images/6d0bdba8-4aba-40a7-a520-b464f2c57a9014808107313377730382.png',
+  p024: 'https://thumbnail6.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/image_audit/stage/manual/0734f650d57c74b192cebf0d16e66b36a40ce79d94cebb92bd2f134f66c1_1791957441095.jpg',
+  p025: 'https://thumbnail4.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/image_audit/stage/manual/5f3e984e-bd25-44e5-bf1a-c32c97ae9e43_1792747608579.jpeg',
+  p030: 'https://t5a.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/777a/540c8009e5d1a9ce56a12d8a9e8d48c5e1127b43f7c528df69bccaff9e8e.jpg',
+  p031: 'https://thumbnail1.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/d63b/9cfdd7e95c0b79210d93be1147cf7098f14bfe7b5283aabc60c973e41017.jpg',
+};
+for (const [id, url] of Object.entries(COUPANG_THUMBS)) {
+  if (!/^https:\/\/[a-z0-9]+\.coupangcdn\.com\/thumbnails\//.test(url)) throw new Error('이미지 주소 형식 오류: ' + id);
+  meta(id, { image: url, imageCredit: '쿠팡 파트너스 제공 이미지' });
+}
+
 // img/ 폴더에 `p001.jpg`처럼 제품 ID로 저장한 사진을 자동 연결합니다(jpg/jpeg/png/webp).
 // 출처·이용 허락 표기는 img/credits.json에 {"p001": "하기스 제공"} 형태로 적습니다. 권리가 확인된 사진만 넣으세요.
 const imgDir = path.join(__dirname, '..', 'img');
