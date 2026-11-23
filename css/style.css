@@ -161,3 +161,33 @@ td.r,th.r{text-align:right}
 
 /* 쿠팡 파트너스 안내: 버튼 바로 아래, 작지만 읽을 수 있는 크기 */
 .btns .aff{flex-basis:100%;margin:0;text-align:center;font-size:.75rem;line-height:1.35;color:var(--muted)}
+
+/* 개선: 목록 머리, 관심, 월령, FAQ */
+.listhead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.lh-right{display:flex;align-items:center;gap:10px}
+.asof{font-size:.8rem;color:var(--muted)}
+.achip.fav{min-height:36px;padding:4px 12px;background:#fff;border-color:var(--line)}
+.achip.fav.on{background:#ffe3ea;border-color:#f2a3b8;color:#a8325a;font-weight:700}
+.c-right{display:flex;align-items:center;gap:4px}
+.heart{border:0;background:none;font-size:1.3rem;line-height:1;padding:8px;margin:-8px -8px -8px 0;color:#a8325a;min-width:40px;min-height:40px}
+.heart.on{color:#d6336c}
+.age{align-self:flex-start;font-size:.78rem;background:var(--mint);color:#1d6b50;border-radius:999px;padding:1px 10px;font-weight:600}
+.sheet h2+.age{margin:4px 0 0;display:inline-block}
+.sub a{color:inherit;font-weight:700}
+.btns .aff.warn{color:#8a5a00;font-weight:600}
+.faq h2{margin:0 0 6px;font-size:1.05rem}
+.faq details{border-top:1px solid var(--line);padding:2px 0}
+.faq details:first-of-type{border-top:0}
+.faq summary{padding:10px 0;font-weight:600}
+.faq p{margin:0 0 12px;font-size:.92rem}
+.stick .wrap{max-width:1100px}
+.notice{text-align:center}
+@media (min-width:900px){
+  .stick .wrap{display:flex;align-items:center;gap:16px}
+  .stick .tabs{flex:1}
+  .stick .bar{margin:0;width:340px;max-width:none;flex:0 0 auto}
+  .notice{padding-left:20px;padding-right:44px}
+}
+
+.sub .long{display:none}
+@media (min-width:600px){.sub .long{display:inline}.sub .short{display:none}}

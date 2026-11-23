@@ -44,6 +44,9 @@
 
   const state = { cat: 'diaper', tier: new Set(), brand: new Set(), type: new Set(), stage: new Set(), judge: new Set(), q: '', sort: 'diff' };
   let DB = null;
+  let favs = new Set();
+  let favOnly = false;
+  let prevBrandCount = 0;
 
   fetch('data/products.json')
     .then((r) => r.json())
@@ -71,6 +74,9 @@
 
   function init() {
     DB.products.forEach((p) => { p.a = analyze(p); });
+    try { favs = new Set(JSON.parse(store.get('favs') || '[]')); } catch (e) { favs = new Set(); }
+    const dates = DB.products.flatMap((p) => (p.history || []).map((x) => x.d)).sort();
+    if (dates.length) { const el = $('#asof'); el.textContent = `가격 기준일 ${dates[dates.length - 1].slice(5).replace('-', '/')}`; el.hidden = false; }
     const savedCat = store.get('cat');
     if (CATS.some((c) => c.id === savedCat)) state.cat = savedCat;
     const savedSort = store.get('sort');
@@ -121,7 +127,12 @@
     });
 
     const open = (card) => { if (card) openModal(card.dataset.id); };
-    $('#grid').addEventListener('click', (e) => { if (!e.target.closest('a')) open(e.target.closest('.card')); });
+    $('#grid').addEventListener('click', (e) => {
+      const hb = e.target.closest('.heart');
+      if (hb) { toggleFav(hb.dataset.fav); return; }
+      if (!e.target.closest('a')) open(e.target.closest('.card'));
+    });
+    $('#favToggle').addEventListener('click', () => { favOnly = !favOnly; renderList(); });
     $('#grid').addEventListener('keydown', (e) => {
       if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('card')) { e.preventDefault(); open(e.target); }
     });
@@ -144,16 +155,15 @@
     }, { passive: true });
     fab.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-    // 브랜드 특징: 데스크톱은 펼침, 모바일은 접힘
-    const mq = window.matchMedia('(min-width: 900px)');
-    const syncBrandBox = () => { $('#brandInfo').open = mq.matches; };
-    syncBrandBox();
-    (mq.addEventListener ? mq.addEventListener('change', syncBrandBox) : mq.addListener(syncBrandBox));
-
     if (DB.products.some((p) => p.links && p.links.coupang)) { $('#affNote').textContent = AFF_TEXT; $('#affNote').hidden = false; }
     render();
   }
 
+  function toggleFav(id) {
+    favs.has(id) ? favs.delete(id) : favs.add(id);
+    store.set('favs', JSON.stringify([...favs]));
+    renderList();
+  }
   function toggle(key, v) {
     const set = state[key];
     set.has(v) ? set.delete(v) : set.add(v);
@@ -161,7 +171,7 @@
   }
   function clearFilters(withSearch) {
     state.brand.clear(); state.type.clear(); state.stage.clear(); state.tier.clear(); state.judge.clear();
-    if (withSearch) { state.q = ''; $('#q').value = ''; }
+    if (withSearch) { state.q = ''; $('#q').value = ''; favOnly = false; }
   }
 
   // 시트/상세 열기·닫기 (모바일 뒤로가기 버튼으로 닫히도록 history 사용)
@@ -201,6 +211,7 @@
     $('#quick').innerHTML = `<button class="chip ${state.brand.size ? '' : 'on'}" data-v="">전체</button>` +
       brands.map((b) => `<button class="chip ${state.brand.has(b) ? 'on' : ''}" data-v="${esc(b)}">${esc(b)}</button>`).join('');
     renderBrands(brands);
+    if (state.brand.size !== prevBrandCount) { $('#brandInfo').open = state.brand.size > 0; prevBrandCount = state.brand.size; }
     renderList();
   }
 
@@ -245,6 +256,7 @@
       if (state.type.size && !state.type.has(p.type)) return false;
       if (state.stage.size && !state.stage.has(p.stage)) return false;
       if (state.judge.size && !state.judge.has(p.a.judge)) return false;
+      if (favOnly && !favs.has(p.id)) return false;
       if (state.q && !(p.name + p.brand).toLowerCase().includes(state.q.toLowerCase())) return false;
       return true;
     });
@@ -257,12 +269,17 @@
     };
     list.sort(sorters[state.sort]);
     $('#count').textContent = `${list.length}개 제품`;
+    const fb = $('#favToggle');
+    fb.classList.toggle('on', favOnly); fb.setAttribute('aria-pressed', favOnly);
+    fb.textContent = `${favOnly ? '♥' : '♡'} 관심만${favs.size ? ` (${favs.size})` : ''}`;
     $('#applyM').textContent = list.length ? `${list.length}개 제품 보기` : '조건에 맞는 제품 없음';
     $('#empty').hidden = list.length > 0;
     $('#grid').innerHTML = list.map((p) => {
       const a = p.a;
       const link = `<a class="mini" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 보기 ↗</a>`;
-      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span>${badge}</div><h3>${esc(p.name)}</h3>`;
+      const isFav = favs.has(p.id);
+      const heart = `<button type="button" class="heart ${isFav ? 'on' : ''}" data-fav="${p.id}" aria-pressed="${isFav}" aria-label="${esc(p.name)} 관심 ${isFav ? '해제' : '추가'}">${isFav ? '♥' : '♡'}</button>`;
+      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><h3>${esc(p.name)}</h3>${p.age ? `<span class="age">${esc(p.age)}</span>` : ''}`;
       if (a.none) {
         return `<article class="card nodata" data-id="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} 상세 보기">${top('<span class="badge pending">대기</span>')}
           <div class="c-mid"><span class="price none">가격 수집 전</span></div>
@@ -313,8 +330,8 @@
     const p = DB.products.find((x) => x.id === id);
     const a = p.a;
     const b = DB.brands[p.brand];
-    const head = `<div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>`;
-    const btns = `<div class="btns"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a>${p.links && p.links.coupang ? '<p class="aff">' + esc(AFF_TEXT) + '</p>' : ''}</div>`;
+    const head = `<div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${p.age ? `<span class="age">대상: ${esc(p.age)}</span>` : ''}`;
+    const btns = `<div class="btns"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a>${p.links && p.links.coupang ? (p.coupangNote ? '<p class="aff warn">' + esc(p.coupangNote) + '</p>' : '') + '<p class="aff">' + esc(AFF_TEXT) + '</p>' : ''}</div>`;
     const brandBox = b ? `<div class="binfo"><b>${esc(p.brand)}</b> ${tierTag(b.tier)} · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
 
     if (a.none) {

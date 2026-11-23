@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>아기쇼핑 가격비교 - 육아용품 단가 추이</title>
+  <meta name="theme-color" content="#e8643b">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="아기쇼핑 가격비교">
+  <meta property="og:description" content="기저귀 1매당·분유 100g당 가격으로 지금 사도 되는지 확인하세요.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%8D%BC%3C/text%3E%3C/svg%3E">
   <meta name="description" content="기저귀·분유·쪽쪽이·젖병 등 육아용품의 시장 최저 단가 추이를 보고, 지금 가격이 싼지 비싼지 확인하세요.">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -11,7 +16,7 @@
   <header class="top">
     <div class="wrap">
       <h1>🍼 아기쇼핑 가격비교</h1>
-      <p class="sub">지금 가격이 <b>싼지 비싼지</b> 단가 추이로 알려드려요</p>
+      <p class="sub"><span class="long">기저귀 <b>1매당</b>·분유 <b>100g당</b> 가격으로 지금이 싼지 비싼지 알려드려요</span><span class="short"><b>1매당·100g당</b> 단가로 싼지 비싼지 확인</span> · <a href="#faq">사용법</a></p>
     </div>
   </header>
 
@@ -71,23 +76,41 @@
 
         <div class="listhead">
           <div class="count" id="count" role="status" aria-live="polite"></div>
-          <div class="active" id="active"></div>
+          <div class="lh-right">
+            <span id="asof" class="asof" hidden></span>
+            <button id="favToggle" class="achip fav" type="button" aria-pressed="false">♡ 관심만</button>
+          </div>
         </div>
+        <div class="active" id="active"></div>
         <section class="grid" id="grid"><p class="empty">불러오는 중…</p></section>
         <div class="empty" id="empty" hidden>
           <p>조건에 맞는 제품이 없어요.</p>
           <button id="emptyReset" class="btn primary" type="button">필터 모두 지우기</button>
         </div>
 
-        <details class="panel how">
-          <summary>가격 판단은 이렇게 해요</summary>
-          <ul>
-            <li>가격은 <b>배송비를 포함한 시장 최저가</b>를 기저귀·물티슈는 1매, 분유는 100g당 같은 <b>단가</b>로 환산해 기록해요. 팩 구성이 달라도 단가로 비교할 수 있어요.</li>
-            <li>기록한 단가를 최근 6개월 평균과 비교해요. 평균보다 5% 이상 낮으면 <span class="badge cheap">저렴</span>, 5% 이상 높으면 <span class="badge pricey">비쌈</span>, 그 사이는 <span class="badge normal">보통</span>이에요.</li>
-            <li>기록이 <b>4회 미만이거나 3주 미만</b>이면 정확한 비교가 어려워 <span class="badge pending">기록 중</span>으로 표시해요.</li>
-            <li>실시간 가격과 쇼핑몰별 비교는 <b>네이버 가격 비교 보기</b> 링크로 확인하세요.</li>
-          </ul>
-        </details>
+        <section class="panel faq" id="faq">
+          <h2>자주 묻는 질문</h2>
+          <details>
+            <summary>단가가 뭐예요?</summary>
+            <p>팩 구성이 달라도 비교할 수 있게 <b>기저귀·물티슈는 1매당, 분유는 100g당, 젖병·쪽쪽이는 1개당</b> 가격으로 환산한 값이에요. 예를 들어 66매 19,650원이면 1매당 약 297.7원이에요.</p>
+          </details>
+          <details>
+            <summary>싼지 비싼지는 어떻게 정하나요?</summary>
+            <p>배송비를 포함한 <b>시장 최저가</b>를 단가로 기록하고, 최근 6개월 평균과 비교해요. 평균보다 5% 이상 낮으면 <span class="badge cheap">저렴</span>, 5% 이상 높으면 <span class="badge pricey">비쌈</span>, 그 사이는 <span class="badge normal">보통</span>이에요.</p>
+          </details>
+          <details>
+            <summary>"기록 중"은 무슨 뜻이에요?</summary>
+            <p>가격 기록이 <b>4회 미만이거나 3주 미만</b>이면 정확한 비교가 어려워 판단을 미뤄요. 지금은 기록을 쌓는 중이라 대부분 이 상태예요. 현재 가격은 카드의 <b>네이버 가격 보기</b>로 바로 확인하세요.</p>
+          </details>
+          <details>
+            <summary>여기서 바로 살 수 있나요?</summary>
+            <p>아니요. 이 사이트는 가격을 비교해 알려드리고, 구매는 네이버·쿠팡으로 이동해서 해요. 쿠팡 링크는 쿠팡 파트너스 활동의 일환으로 운영자가 수수료를 받을 수 있어요. 가격은 실시간이 아니니 구매 전 꼭 확인하세요.</p>
+          </details>
+          <details>
+            <summary>월령·단계 표시는 믿어도 되나요?</summary>
+            <p>쇼핑몰 판매 페이지에 적힌 표기를 옮긴 참고용이에요. 아기마다 달라서 기저귀는 체중 기준을 포장에서 꼭 확인하세요.</p>
+          </details>
+        </section>
       </div>
     </div>
   </main>
@@ -95,7 +118,7 @@
   <footer class="foot">
     <div class="wrap">
       <p id="affNote" hidden></p>
-      <p>가격은 수집 시점에 따라 실제와 다를 수 있으니 구매 전 해당 쇼핑몰에서 꼭 확인하세요. 브랜드 설명은 참고용 요약입니다.</p>
+      <p>가격은 실시간이 아니며 수집 시점에 따라 실제와 다를 수 있어요. 구매 전 해당 쇼핑몰에서 꼭 확인하세요. 브랜드·월령 설명은 참고용 요약입니다.</p>
     </div>
   </footer>
 

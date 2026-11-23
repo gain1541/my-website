@@ -65,6 +65,22 @@ add('etc', '베베숲', '베베숲 센시티브 캡형 80매×10팩', '물티슈
 add('etc', '아토팜', '아토팜 MLE 크림 160ml', '로션·크림', '전연령', 160, 'ml', 100);
 add('etc', '존슨즈베이비', '존슨즈베이비 베드타임 로션 500ml', '로션·크림', '전연령', 500, 'ml', 100);
 
+// 제품 부가 정보: age(대상 월령, 판매 페이지 표기 기준), coupangNote(쿠팡 링크가 정확히 같은 구성이 아닐 때 안내)
+const meta = (id, o) => Object.assign(products.find((x) => x.id === id), o);
+meta('p001', { age: '신생아용' });
+meta('p002', { age: '생후 약 1개월~' });
+meta('p007', { age: '신생아용' });
+meta('p009', { age: '~백일' });
+meta('p011', { age: '12~24개월' });
+meta('p012', { age: '0~6개월' });
+meta('p013', { age: '6~12개월' });
+meta('p014', { age: '12~24개월' });
+meta('p015', { age: '0~6개월' });
+meta('p020', { age: '0~6개월' });
+meta('p021', { age: '12개월~' });
+const SEARCH_NOTE = '쿠팡 검색 결과로 이동해요. 수량·라인이 다를 수 있으니 구성을 확인하세요.';
+['p008', 'p018', 'p020', 'p021', 'p028'].forEach((id) => meta(id, { coupangNote: SEARCH_NOTE }));
+
 // 제품별 쇼핑몰 상품 페이지 링크 (추적 파라미터 없이 주소 앞부분만 저장). key: naver | coupang
 const link = (id, key, url) => { const p = products.find((x) => x.id === id); p.links = { ...(p.links || {}), [key]: url }; };
 link('p001', 'naver', 'https://search.shopping.naver.com/catalog/59645004330');
