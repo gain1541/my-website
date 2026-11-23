@@ -217,9 +217,12 @@
     chips('fBrand', brands, state.brand);
     chips('fTier', TIERS.map((t) => t.id), state.tier, (v) => TIERS.find((t) => t.id === v).label);
     chips('fType', uniq(list.map((p) => p.type)), state.type);
-    const stages = uniq(list.map((p) => p.stage)).sort((a, b) => STAGE_ORDER.indexOf(a) - STAGE_ORDER.indexOf(b));
+    // 쪽쪽이는 브랜드마다 월령 표기가 달라서, 단계 대신 공통 월령 구간(월령 가이드와 동일)으로 거릅니다.
+    const isPac = state.cat === 'pacifier';
+    const stages = isPac ? BANDS.map((x) => x.label) : uniq(list.map((p) => p.stage)).sort((a, b) => STAGE_ORDER.indexOf(a) - STAGE_ORDER.indexOf(b));
     chips('fStage', stages, state.stage);
     $('#fStage').parentElement.hidden = stages.length <= 1;
+    $('#fStage').previousElementSibling.textContent = isPac ? '월령' : '단계';
     chips('fJudge', JUDGES, state.judge, (v) => JF[v]);
     $('#quick').innerHTML = `<button class="chip ${state.brand.size ? '' : 'on'}" data-v="">전체</button>` +
       brands.map((b) => `<button class="chip ${state.brand.has(b) ? 'on' : ''}" data-v="${esc(b)}">${esc(b)}</button>`).join('');
@@ -333,7 +336,7 @@
       if (state.brand.size && !state.brand.has(p.brand)) return false;
       if (state.tier.size && !state.tier.has(tierOf(p))) return false;
       if (state.type.size && !state.type.has(p.type)) return false;
-      if (state.stage.size && !state.stage.has(p.stage)) return false;
+      if (state.stage.size && !(state.cat === 'pacifier' ? [...state.stage].some((l) => overlap(p, BANDS.find((x) => x.label === l))) : state.stage.has(p.stage))) return false;
       if (state.judge.size && !state.judge.has(p.a.judge)) return false;
       if (favOnly && !favs.has(p.id)) return false;
       if (state.q && !(p.name + p.brand).toLowerCase().includes(state.q.toLowerCase())) return false;
