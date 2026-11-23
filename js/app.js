@@ -234,7 +234,7 @@
     const p = DB.products.find((x) => x.id === id);
     const a = p.a;
     const b = DB.brands[p.brand];
-    const shopUrl = (s) => (DB.shops.find((x) => x.id === s) || {}).url + encodeURIComponent(p.name);
+    const shopUrl = (s) => (p.links && p.links[s]) || (DB.shops.find((x) => x.id === s) || {}).url + encodeURIComponent(p.name);
     const head = `<div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>`;
     const brandBox = b ? `<div class="binfo"><b>${esc(p.brand)}</b> ${tierTag(b.tier)} · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
 

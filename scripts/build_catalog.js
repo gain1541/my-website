@@ -70,6 +70,10 @@ add('etc', '베베숲', '베베숲 센시티브 캡형 80매×10팩', '물티슈
 add('etc', '아토팜', '아토팜 MLE 크림 160ml', '로션·크림', '전연령', 160, 'ml', 100);
 add('etc', '존슨즈베이비', '존슨즈베이비 베드타임 로션 500ml', '로션·크림', '전연령', 500, 'ml', 100);
 
+// 제품별 쇼핑몰 상품 페이지 링크 (추적 파라미터 없이 주소 앞부분만 저장)
+const link = (id, shop, url) => { products.find((p) => p.id === id).links = { ...(products.find((p) => p.id === id).links || {}), [shop]: url }; };
+link('p001', '네이버쇼핑', 'https://search.shopping.naver.com/catalog/59645004330');
+
 const out = { sample: false, generatedAt: new Date().toISOString().slice(0, 10), dates: [], shops, brands, products };
 fs.writeFileSync(path.join(__dirname, '..', 'data', 'products.json'), JSON.stringify(out));
 
