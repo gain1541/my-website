@@ -302,3 +302,5 @@ td.r,th.r{text-align:right}
 .inq-done p{margin:0 0 16px;color:var(--muted);font-size:.9rem;line-height:1.5}
 .inq-done-actions{display:flex;gap:8px;justify-content:center}
 @media (min-width:900px){.inq-modal{align-items:center}.inq-card{border-radius:20px;padding:24px 26px 22px;animation:none}.inq-grab{display:none}}
+
+.basis.wow{color:var(--pend);font-weight:600}
