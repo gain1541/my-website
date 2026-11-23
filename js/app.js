@@ -375,7 +375,7 @@
       const link = `<a class="mini" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 보기 ↗</a>`;
       const isFav = favs.has(p.id);
       const heart = `<button type="button" class="heart ${isFav ? 'on' : ''}" data-fav="${p.id}" aria-pressed="${isFav}" aria-label="${esc(p.name)} 관심 ${isFav ? '해제' : '추가'}">${isFav ? '♥' : '♡'}</button>`;
-      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3>${esc(p.name)}</h3>${p.age ? `<span class="age">${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}</div></div>`;
+      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3>${esc(p.name)}</h3>${p.age ? `<span class="age">${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>`;
       if (a.none) {
         return `<article class="card nodata" data-id="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} 상세 보기">${top('<span class="badge pending">대기</span>')}
           <div class="c-mid"><span class="price none">가격 수집 전</span></div>
@@ -426,7 +426,7 @@
     const p = DB.products.find((x) => x.id === id);
     const a = p.a;
     const b = DB.brands[p.brand];
-    const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${p.age ? `<span class="age">대상: ${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}</div></div>${p.note ? `<p class="basis note-line">ℹ️ ${esc(p.note)}</p>` : ''}${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
+    const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${p.age ? `<span class="age">대상: ${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>${p.note ? `<p class="basis note-line">ℹ️ ${esc(p.note)}</p>` : ''}${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
     const btns = `<div class="btns"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a>${p.links && p.links.coupang ? (p.coupangNote ? '<p class="aff warn">' + esc(p.coupangNote) + '</p>' : '') + '<p class="aff">' + esc(AFF_TEXT) + '</p>' : ''}</div>`;
     const reqLine = reqUrl ? `<p class="basis"><a class="req-inline" target="_blank" rel="noopener noreferrer" href="${esc(reqUrl)}">가격·정보가 달라요? 제보하기 ↗</a></p>` : '';
     const brandBox = b ? `<div class="binfo"><b>${esc(p.brand)}</b> ${tierTag(b.tier)} · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
