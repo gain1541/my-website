@@ -120,7 +120,7 @@ meta('p049', { age: '6개월 이상' });
 const MONTHS = { p001: [0, 1], p007: [0, 1], p009: [0, 3], p011: [12, 24], p012: [0, 6], p013: [6, 12], p014: [12, 24], p015: [0, 6], p020: [0, 6], p021: [12, null], p022: [0, 6], p023: [6, 18], p040: [0, 6], p041: [6, 12], p042: [6, 18], p043: [6, 16], p044: [0, 6], p045: [6, 18], p046: [1, 3], p047: [3, 6], p048: [6, null], p049: [6, null] };
 for (const [id, m] of Object.entries(MONTHS)) meta(id, { months: m });
 const SEARCH_NOTE = '쿠팡 검색 결과로 이동해요. 수량·라인이 다를 수 있으니 구성을 확인하세요.';
-['p008', 'p018', 'p020', 'p021', 'p028'].forEach((id) => meta(id, { coupangNote: SEARCH_NOTE }));
+['p008', 'p018', 'p020', 'p021', 'p028', 'p032', 'p033', 'p034', 'p035', 'p036', 'p037', 'p038', 'p039', 'p042', 'p043', 'p044', 'p045', 'p046', 'p049'].forEach((id) => meta(id, { coupangNote: SEARCH_NOTE }));
 
 // 제품별 쇼핑몰 상품 페이지 링크 (추적 파라미터 없이 주소 앞부분만 저장). key: naver | coupang
 const link = (id, key, url) => { const p = products.find((x) => x.id === id); p.links = { ...(p.links || {}), [key]: url }; };
@@ -152,6 +152,7 @@ const COUPANG_THUMBS = {
   p025: 'https://thumbnail4.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/image_audit/stage/manual/5f3e984e-bd25-44e5-bf1a-c32c97ae9e43_1792747608579.jpeg',
   p030: 'https://t5a.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/777a/540c8009e5d1a9ce56a12d8a9e8d48c5e1127b43f7c528df69bccaff9e8e.jpg',
   p031: 'https://thumbnail1.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/d63b/9cfdd7e95c0b79210d93be1147cf7098f14bfe7b5283aabc60c973e41017.jpg',
+  p040: 'https://thumbnail12.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/image_audit/advertiser/1777097143610/6f22993c-b59e-4c36-803c-84879e80a4f2.jpg',
 };
 for (const [id, url] of Object.entries(COUPANG_THUMBS)) {
   if (!/^https:\/\/[a-z0-9]+\.coupangcdn\.com\/thumbnails\//.test(url)) throw new Error('이미지 주소 형식 오류: ' + id);
