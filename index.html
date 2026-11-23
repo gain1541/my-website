@@ -61,10 +61,10 @@
             </select>
           </label>
           <div class="group"><b>브랜드</b><div class="chips" id="fBrand"></div></div>
-          <div class="group"><b>브랜드 가격대</b><div class="chips" id="fTier"></div></div>
+          <div class="group"><b>브랜드 등급</b><p class="ghint">브랜드의 가격 수준이에요(운영자 분류).</p><div class="chips" id="fTier"></div></div>
           <div class="group"><b>종류</b><div class="chips" id="fType"></div></div>
           <div class="group"><b>단계</b><div class="chips" id="fStage"></div></div>
-          <div class="group"><b>가격 판단</b><div class="chips" id="fJudge"></div></div>
+          <div class="group sep"><b>지금 가격</b><p class="ghint">최근 6개월 평균과 비교한 지금 단가예요.</p><div class="chips" id="fJudge"></div></div>
           <button id="reset" class="link" type="button">필터 초기화</button>
           <div class="sheet-foot">
             <button id="resetM" class="btn" type="button">초기화</button>
@@ -102,6 +102,10 @@
           <details>
             <summary>싼지 비싼지는 어떻게 정하나요?</summary>
             <p>배송비를 포함한 <b>시장 최저가</b>를 단가로 기록하고, 최근 6개월 평균과 비교해요. 평균보다 5% 이상 낮으면 <span class="badge cheap">저렴</span>, 5% 이상 높으면 <span class="badge pricey">비쌈</span>, 그 사이는 <span class="badge normal">보통</span>이에요.</p>
+          </details>
+          <details>
+            <summary>"브랜드 등급"과 "지금 가격"은 뭐가 달라요?</summary>
+            <p><b>브랜드 등급</b>(프리미엄·일반·가성비)은 브랜드의 평소 가격 수준이라 잘 바뀌지 않아요. <b>지금 가격</b>(저렴·보통·비쌈)은 이 제품의 지금 단가가 <b>평소보다</b> 싼지를 보여줘서 날마다 달라질 수 있어요. 가성비 브랜드라도 지금은 비쌀 수 있고, 프리미엄 브랜드가 세일 중일 수도 있어요.</p>
           </details>
           <details>
             <summary>"기록 중"은 무슨 뜻이에요?</summary>

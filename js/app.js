@@ -8,12 +8,15 @@
   ];
   const STAGE_ORDER = ['1단계(신생아)', '1단계', '2단계', '3단계', '4단계', '5단계', '0~6개월', '6~18개월', '전연령'];
   const JUDGES = ['cheap', 'normal', 'pricey', 'pending'];
+  // 필터·선택칩에서는 '평소 대비'임을 분명히 하는 긴 라벨을 씁니다.
+  const JF = { cheap: '평소보다 저렴', normal: '평소 수준', pricey: '평소보다 비쌈', pending: '비교 준비 중' };
   const JL = { cheap: '저렴', normal: '보통', pricey: '비쌈', pending: '기록 중' };
   const TIERS = [
-    { id: '상', label: '상 (프리미엄)' },
-    { id: '중', label: '중' },
+    { id: '상', label: '프리미엄' },
+    { id: '중', label: '일반' },
     { id: '가성비', label: '가성비' },
   ];
+  const tierLabel = (id) => (TIERS.find((x) => x.id === id) || {}).label || id;
   const tierClass = { '상': 'hi', '중': 'mid', '가성비': 'low' };
   const DAY = 86400000;
   const WINDOW_DAYS = 182; // 평균 산출 기간(약 6개월)
@@ -30,7 +33,7 @@
   const fmtU = (v) => (v >= 1000 ? Math.round(v).toLocaleString('ko-KR') : v.toFixed(1).replace(/\.0$/, ''));
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const tierOf = (p) => (DB.brands[p.brand] || {}).tier;
-  const tierTag = (t) => (t ? `<span class="tier ${tierClass[t]}">${esc(t)}</span>` : '');
+  const tierTag = (t) => (t ? `<span class="tier ${tierClass[t]}" title="브랜드 등급">${esc(tierLabel(t))}</span>` : '');
   const unitLabel = (p) => `${p.basis}${p.unit}당`;
   const packPrice = (p, u) => Math.round((u * p.qty) / p.basis / 10) * 10; // 10원 단위 환산
   const pct = (d) => (d > 0 ? '+' : '') + (d * 100).toFixed(1) + '%';
@@ -217,7 +220,7 @@
     const stages = uniq(list.map((p) => p.stage)).sort((a, b) => STAGE_ORDER.indexOf(a) - STAGE_ORDER.indexOf(b));
     chips('fStage', stages, state.stage);
     $('#fStage').parentElement.hidden = stages.length <= 1;
-    chips('fJudge', JUDGES, state.judge, (v) => JL[v]);
+    chips('fJudge', JUDGES, state.judge, (v) => JF[v]);
     $('#quick').innerHTML = `<button class="chip ${state.brand.size ? '' : 'on'}" data-v="">전체</button>` +
       brands.map((b) => `<button class="chip ${state.brand.has(b) ? 'on' : ''}" data-v="${esc(b)}">${esc(b)}</button>`).join('');
     renderBrands(brands);
@@ -317,7 +320,7 @@
     state.tier.forEach((v) => items.push(['tier', v, TIERS.find((t) => t.id === v).label]));
     state.type.forEach((v) => items.push(['type', v, v]));
     state.stage.forEach((v) => items.push(['stage', v, v]));
-    state.judge.forEach((v) => items.push(['judge', v, JL[v]]));
+    state.judge.forEach((v) => items.push(['judge', v, JF[v]]));
     $('#active').innerHTML = items.map(([k, v, l]) => `<button class="achip" data-k="${k}" data-v="${esc(v)}" aria-label="${esc(l)} 필터 해제">${esc(l)} ✕</button>`).join('');
     const n = items.length + state.brand.size;
     const fc = $('#fCount');

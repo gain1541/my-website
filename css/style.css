@@ -249,3 +249,11 @@ td.r,th.r{text-align:right}
 .top h1{display:flex;align-items:center;gap:8px}
 .top h1 .logo{width:32px;height:32px;flex:0 0 auto;border-radius:8px}
 @media (min-width:900px){.top h1 .logo{width:44px;height:44px;border-radius:11px}}
+
+/* 브랜드 등급(고정 속성)과 지금 가격(변하는 판단) 구분 */
+.tier{background:transparent;border:1px solid currentColor;border-radius:6px;font-weight:600;padding:0 7px;margin-left:6px}
+.tier.hi{color:#5b3fc4;background:transparent}
+.tier.mid{color:#4a5568;background:transparent}
+.tier.low{color:#2f6f8f;background:transparent}
+.ghint{margin:0 0 6px;font-size:.78rem;color:var(--muted);line-height:1.35}
+.group.sep{margin-top:18px;padding-top:14px;border-top:1px dashed #d9cbc3}
