@@ -311,3 +311,17 @@ td.r,th.r{text-align:right}
 .thumb.steril{background:#f6f2ff}.thumb.nipple{background:#fff4ee}
 
 .age.inc{background:#fff0c9;color:#8a5a00}
+
+/* 헤더 배경 장식: 공유 이미지와 같은 톤의 부드러운 원 + 가격 추이 선 (장식 전용, 글자 영역은 건드리지 않음) */
+.top{position:relative;overflow:hidden;isolation:isolate}
+.top::before{content:"";position:absolute;z-index:-1;right:-70px;top:-90px;width:260px;height:260px;border-radius:50%;background:#d6f2e8;opacity:.8}
+.top::after{content:"";position:absolute;z-index:-1;right:70px;bottom:-110px;width:200px;height:200px;border-radius:50%;background:#fff;opacity:.5}
+.top .wrap{position:relative;z-index:1}
+body{background:linear-gradient(180deg,#fff1ea 0,var(--bg) 380px) no-repeat,var(--bg)}
+@media (min-width:900px){
+  .top::before{right:-110px;top:-170px;width:460px;height:460px}
+  .top::after{right:160px;bottom:-190px;width:340px;height:340px}
+}
+@media (min-width:1200px){
+  .top .wrap{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 330 150'%3E%3Cpath d='M8 110 L60 84 L112 96 L164 58 L216 70 L268 34 L322 52' fill='none' stroke='%237c6cf0' stroke-width='7' stroke-linecap='round' stroke-linejoin='round' opacity='.35'/%3E%3Ccircle cx='322' cy='52' r='11' fill='%23e8643b' opacity='.8'/%3E%3Cline x1='8' y1='78' x2='322' y2='78' stroke='%23e8643b' stroke-width='3' stroke-dasharray='8 7' opacity='.45'/%3E%3C/svg%3E") no-repeat right 250px center/260px 118px}
+}
