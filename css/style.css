@@ -245,3 +245,7 @@ td.r,th.r{text-align:right}
 .wnote.warn{color:var(--pend);background:var(--pend-bg);border-radius:10px;padding:8px 10px;margin-bottom:12px}
 
 .top h1 small{font-size:.55em;font-weight:600;color:#5a5870;margin-left:4px;letter-spacing:0}
+
+.top h1{display:flex;align-items:center;gap:8px}
+.top h1 .logo{width:32px;height:32px;flex:0 0 auto;border-radius:8px}
+@media (min-width:900px){.top h1 .logo{width:44px;height:44px;border-radius:11px}}
