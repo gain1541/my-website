@@ -95,3 +95,19 @@ a.go{color:#3b6fd6;text-decoration:none;font-weight:600}
   .stats{grid-template-columns:repeat(4,1fr)}
   .top h1{font-size:2rem}
 }
+
+/* 필터: 왼쪽 사이드바 + 큰 선택 박스 */
+#filters{padding:20px}
+#filters input,#filters select{font-size:1rem;padding:12px 14px}
+#filters .group>b{font-size:.95rem;color:var(--ink)}
+#filters .chip{font-size:1rem;padding:9px 16px}
+#filters .field{font-size:.95rem}
+.layout{display:block}
+@media (min-width:900px){
+  .layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px;align-items:start}
+  .side{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+  .side #filters{margin-bottom:0}
+  .row{flex-direction:column}
+  .field.grow{flex:0 0 auto}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+}

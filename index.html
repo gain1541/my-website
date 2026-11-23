@@ -22,6 +22,8 @@
   <main class="wrap">
     <nav class="tabs" id="tabs" aria-label="카테고리"></nav>
 
+    <div class="layout">
+    <aside class="side">
     <section class="panel" id="filters">
       <div class="row">
         <label class="field grow">
@@ -45,12 +47,15 @@
       <div class="group"><b>가격 판단</b><div class="chips" id="fJudge"></div></div>
       <button id="reset" class="link" type="button">필터 초기화</button>
     </section>
-
+    </aside>
+    <div class="content">
     <section id="brandInfo" class="panel"></section>
 
     <div class="count" id="count"></div>
     <section class="grid" id="grid"></section>
     <p class="empty" id="empty" hidden>조건에 맞는 제품이 없어요. 필터를 조금 줄여보세요.</p>
+    </div>
+    </div>
 
     <section class="panel how">
       <h2>가격 판단은 이렇게 해요</h2>
