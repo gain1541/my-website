@@ -304,3 +304,6 @@ td.r,th.r{text-align:right}
 @media (min-width:900px){.inq-modal{align-items:center}.inq-card{border-radius:20px;padding:24px 26px 22px;animation:none}.inq-grab{display:none}}
 
 .basis.wow{color:var(--pend);font-weight:600}
+
+.age.fit{background:var(--lav);color:#4b3aa8}
+.note-line{background:#fff8ec;border-radius:10px;padding:8px 10px;color:#6b4e00;margin:8px 0 0}

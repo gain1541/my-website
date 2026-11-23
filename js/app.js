@@ -4,9 +4,10 @@
     { id: 'formula', label: '분유' },
     { id: 'pacifier', label: '쪽쪽이' },
     { id: 'bottle', label: '분유병(젖병)' },
+    { id: 'nipple', label: '젖꼭지(젖병용)' },
     { id: 'etc', label: '기타 용품' },
   ];
-  const STAGE_ORDER = ['1단계(신생아)', '1단계', '2단계', '3단계', '4단계', '5단계', '대형(L)', '0~6개월', '6~12개월', '6~16개월', '6~18개월', '전연령'];
+  const STAGE_ORDER = ['1단계(신생아)', '1단계', '2단계', '3단계', '4단계', '5단계', '대형(L)', '0~6개월', '6~12개월', '6~16개월', '6~18개월', 'SS', 'S', 'M', 'L', 'LL', '3L', '전연령'];
   const JUDGES = ['cheap', 'normal', 'pricey', 'pending'];
   // 필터·선택칩에서는 '평소 대비'임을 분명히 하는 긴 라벨을 씁니다.
   const JF = { cheap: '평소보다 저렴', normal: '평소 수준', pricey: '평소보다 비쌈', pending: '비교 준비 중' };
@@ -224,13 +225,15 @@
     const brands = uniq(list.map((p) => p.brand));
     chips('fBrand', brands, state.brand);
     chips('fTier', TIERS.map((t) => t.id), state.tier, (v) => TIERS.find((t) => t.id === v).label);
-    chips('fType', uniq(list.map((p) => p.type)), state.type);
+    // 브랜드를 고르면 종류·단계 칩도 그 브랜드의 것만 보여줍니다(이미 선택한 칩은 유지).
+    const base = state.brand.size ? list.filter((p) => state.brand.has(p.brand)) : list;
+    chips('fType', uniq([...base.map((p) => p.type), ...state.type]), state.type);
     // 쪽쪽이는 브랜드마다 월령 표기가 달라서, 단계 대신 공통 월령 구간(월령 가이드와 동일)으로 거릅니다.
     const isPac = state.cat === 'pacifier';
-    const stages = isPac ? BANDS.map((x) => x.label) : uniq(list.map((p) => p.stage)).sort((a, b) => STAGE_ORDER.indexOf(a) - STAGE_ORDER.indexOf(b));
+    const stages = isPac ? BANDS.map((x) => x.label) : uniq([...base.map((p) => p.stage), ...state.stage]).sort((a, b) => STAGE_ORDER.indexOf(a) - STAGE_ORDER.indexOf(b));
     chips('fStage', stages, state.stage);
     $('#fStage').parentElement.hidden = stages.length <= 1;
-    $('#fStage').previousElementSibling.textContent = isPac ? '월령' : '단계';
+    $('#fStage').previousElementSibling.textContent = isPac ? '월령' : state.cat === 'nipple' ? '단계·사이즈' : '단계';
     chips('fJudge', JUDGES, state.judge, (v) => JF[v]);
     $('#quick').innerHTML = `<button class="chip ${state.brand.size ? '' : 'on'}" data-v="">전체</button>` +
       brands.map((b) => `<button class="chip ${state.brand.has(b) ? 'on' : ''}" data-v="${esc(b)}">${esc(b)}</button>`).join('');
@@ -278,7 +281,8 @@
     { cat: 'diaper', title: '기저귀', tip: '기저귀는 월령보다 <b>체중</b>으로 단계를 골라요. 단계별 체중 기준은 브랜드마다 달라서 포장의 체중 기준을 꼭 확인하세요.' },
     { cat: 'formula', title: '분유', tip: '분유 단계의 월령은 <b>브랜드마다 달라요.</b> 아래는 판매 페이지에 적힌 월령이에요.' },
     { cat: 'pacifier', title: '쪽쪽이', tip: '쪽쪽이는 월령별 사이즈(S1, S2)를 맞춰 쓰는 제품이에요.' },
-    { cat: 'bottle', title: '분유병(젖병)', tip: '젖병은 월령보다 <b>수유량</b>에 맞춰 용량을 고르고, 젖꼭지는 <b>단계(유속)가 따로</b> 있어요. 예를 들어 닥터브라운 옵션스+는 1단계가 기본으로 들어 있고 2·3단계는 따로 사요.', noList: true },
+    { cat: 'bottle', title: '분유병(젖병)', tip: '젖병은 월령보다 <b>수유량</b>에 맞춰 용량을 골라요. 세트에 들어 있는 젖꼭지의 단계·사이즈는 구성마다 달라요.', noList: true },
+    { cat: 'nipple', title: '젖꼭지(젖병용)', tip: '젖꼭지는 <b>단계(유속)·사이즈</b>를 아기에게 맞춰 바꿔 줘요. 단계별 월령은 브랜드마다 달라서 상품 상세에서 확인하고, <b>쓰는 젖병과 호환되는지</b> 꼭 확인하세요. 월령이 확인된 제품이 없어 목록은 "젖꼭지" 탭에서 보세요.', noList: true },
   ];
 
   function renderGuide() {
@@ -320,6 +324,7 @@
     pacifier: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="12" r="7" fill="none" stroke="#7c6cf0" stroke-width="3"/><path d="M6 27c0-5 8-8 18-8s18 3 18 8-8 8-18 8S6 32 6 27z" fill="#e8e0ff" stroke="#7c6cf0" stroke-width="2"/><path d="M19 34c0 6 2 9 5 9s5-3 5-9" fill="#ffd9c9" stroke="#e8643b" stroke-width="2"/></svg>',
     bottle: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M21 3h6l2 6H19z" fill="#ffd9c9" stroke="#e8643b" stroke-width="2" stroke-linejoin="round"/><rect x="16" y="9" width="16" height="6" rx="2" fill="#fff" stroke="#e8643b" stroke-width="2"/><path d="M15 15h18v26a4 4 0 0 1-4 4H19a4 4 0 0 1-4-4z" fill="#d6f2e8" stroke="#23805f" stroke-width="2"/><path d="M15 26h6M15 33h6" stroke="#23805f" stroke-width="2" stroke-linecap="round"/></svg>',
     wipes: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="18" width="34" height="24" rx="5" fill="#d6f2e8" stroke="#23805f" stroke-width="2"/><rect x="12" y="12" width="24" height="8" rx="3" fill="#fff" stroke="#23805f" stroke-width="2"/><path d="M18 12c0-5 4-7 8-7s5 3 3 6" fill="none" stroke="#23805f" stroke-width="2" stroke-linecap="round"/></svg>',
+    nipple: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 4c-4 0-6 4-6 9v6h12v-6c0-5-2-9-6-9z" fill="#ffd9c9" stroke="#e8643b" stroke-width="2" stroke-linejoin="round"/><rect x="10" y="19" width="28" height="8" rx="4" fill="#fff" stroke="#e8643b" stroke-width="2"/><path d="M13 27h22l-2 15H15z" fill="#d6f2e8" stroke="#23805f" stroke-width="2" stroke-linejoin="round"/></svg>',
     tube: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 12h22l-2 28H15z" fill="#ffe3ea" stroke="#c0426b" stroke-width="2" stroke-linejoin="round"/><rect x="17" y="4" width="14" height="8" rx="2" fill="#fff" stroke="#c0426b" stroke-width="2"/><path d="M13 40h22v3H13z" fill="#c0426b"/><circle cx="24" cy="26" r="4" fill="#fff" opacity=".85"/></svg>',
   };
   const kindOf = (p) => (p.cat === 'etc' ? (p.type === '물티슈' ? 'wipes' : 'tube') : p.cat);
@@ -369,7 +374,7 @@
       const link = `<a class="mini" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 보기 ↗</a>`;
       const isFav = favs.has(p.id);
       const heart = `<button type="button" class="heart ${isFav ? 'on' : ''}" data-fav="${p.id}" aria-pressed="${isFav}" aria-label="${esc(p.name)} 관심 ${isFav ? '해제' : '추가'}">${isFav ? '♥' : '♡'}</button>`;
-      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3>${esc(p.name)}</h3>${p.age ? `<span class="age">${esc(p.age)}</span>` : ''}</div></div>`;
+      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3>${esc(p.name)}</h3>${p.age ? `<span class="age">${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}</div></div>`;
       if (a.none) {
         return `<article class="card nodata" data-id="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} 상세 보기">${top('<span class="badge pending">대기</span>')}
           <div class="c-mid"><span class="price none">가격 수집 전</span></div>
@@ -420,7 +425,7 @@
     const p = DB.products.find((x) => x.id === id);
     const a = p.a;
     const b = DB.brands[p.brand];
-    const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${p.age ? `<span class="age">대상: ${esc(p.age)}</span>` : ''}</div></div>${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
+    const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${p.age ? `<span class="age">대상: ${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}</div></div>${p.note ? `<p class="basis note-line">ℹ️ ${esc(p.note)}</p>` : ''}${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
     const btns = `<div class="btns"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a>${p.links && p.links.coupang ? (p.coupangNote ? '<p class="aff warn">' + esc(p.coupangNote) + '</p>' : '') + '<p class="aff">' + esc(AFF_TEXT) + '</p>' : ''}</div>`;
     const reqLine = reqUrl ? `<p class="basis"><a class="req-inline" target="_blank" rel="noopener noreferrer" href="${esc(reqUrl)}">가격·정보가 달라요? 제보하기 ↗</a></p>` : '';
     const brandBox = b ? `<div class="binfo"><b>${esc(p.brand)}</b> ${tierTag(b.tier)} · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
