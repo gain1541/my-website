@@ -89,6 +89,11 @@ const lines = ['date,productId,unitPrice,seller,제품명(참고용),단가 단�
 for (const p of products) lines.push(`${out.generatedAt},${p.id},,,${p.name.replace(/,/g, '')},${unitName(p)}`);
 fs.writeFileSync(path.join(__dirname, '..', 'data', 'prices_template.csv'), lines.join('\n') + '\n');
 
+// 링크 입력용 템플릿 (이미 연결된 링크는 미리 채워 둡니다)
+const linkLines = ['productId,naver,coupang,제품명(참고용)'];
+for (const p of products) linkLines.push(`${p.id},${(p.links && p.links.naver) || ''},${(p.links && p.links.coupang) || ''},${p.name.replace(/,/g, '')}`);
+fs.writeFileSync(path.join(__dirname, '..', 'data', 'links_template.csv'), linkLines.join('\n') + '\n');
+
 const used = new Set(products.map((p) => p.brand));
 const missing = [...used].filter((b) => !brands[b]);
 if (missing.length) { console.error('브랜드 정보 없음:', missing); process.exit(1); }

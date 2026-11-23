@@ -20,6 +20,8 @@
   const MIN_POINTS = 4; // 판단에 필요한 최소 기록 횟수
   const MIN_SPAN = 21; // 판단에 필요한 최소 기록 기간(일)
   const TH = 0.05; // 판단 임계값 5%
+  // 쿠팡 파트너스 안내 문구: 약관의 정확한 표현으로 바꿔 사용하세요.
+  const AFF_TEXT = '이 링크는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받을 수 있습니다.';
   const NAVER = 'https://search.shopping.naver.com/search/all?query=';
   const COUPANG = 'https://www.coupang.com/np/search?q=';
 
@@ -148,6 +150,7 @@
     syncBrandBox();
     (mq.addEventListener ? mq.addEventListener('change', syncBrandBox) : mq.addListener(syncBrandBox));
 
+    if (DB.products.some((p) => p.links && p.links.coupang)) { $('#affNote').textContent = AFF_TEXT; $('#affNote').hidden = false; }
     render();
   }
 
@@ -311,7 +314,7 @@
     const a = p.a;
     const b = DB.brands[p.brand];
     const head = `<div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>`;
-    const btns = `<div class="btns"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a></div>`;
+    const btns = `<div class="btns"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a></div>${p.links && p.links.coupang ? '<p class="basis">' + esc(AFF_TEXT) + '</p>' : ''}`;
     const brandBox = b ? `<div class="binfo"><b>${esc(p.brand)}</b> ${tierTag(b.tier)} · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
 
     if (a.none) {
