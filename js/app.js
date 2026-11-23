@@ -62,7 +62,8 @@
     const judge = valid.length < MIN_WEEKS ? 'pending' : diff <= -TH ? 'cheap' : diff >= TH ? 'pricey' : 'normal';
     const unitPrice = cur / (p.qty / p.basis);
     const bestShop = shops.find((s) => p.prices[s][li] === cur);
-    return { low, cur, avg, min, max, diff, judge, unitPrice, bestShop, weeks: valid.length, nearMin: valid.length >= MIN_WEEKS && cur <= min * 1.02 };
+    const seller = ((p.notes || {})[bestShop] || [])[li] || '';
+    return { low, cur, avg, min, max, diff, judge, unitPrice, bestShop, seller, weeks: valid.length, nearMin: valid.length >= MIN_WEEKS && cur <= min * 1.02 };
   }
 
   function init() {
@@ -194,7 +195,7 @@
       const note = a.judge === 'pending' ? `<span class="diff pending">기록 ${a.weeks}주 · ${MIN_WEEKS}주부터 판단</span>` : `<span class="diff ${a.judge}">평균 대비 ${pct(a.diff)}</span>`;
       return `<button class="card" data-id="${p.id}">${head}
         <span class="meta"><span class="price">${won(a.cur)}</span><span class="badge ${a.judge}">${JL[a.judge]}</span></span>
-        <span class="unit">${unitLabel(p)} ${fmtUnit(a)}원 · 최저가 ${esc(a.bestShop)}</span>
+        <span class="unit">${unitLabel(p)} ${fmtUnit(a)}원 · 최저가 ${esc(a.bestShop)}${a.seller ? ` (${esc(a.seller)})` : ''}</span>
         ${a.weeks > 1 ? spark(a.low) : ''}
         <span class="meta">${note}${a.nearMin ? '<span class="low">역대 최저가 근접</span>' : ''}</span>
       </button>`;
@@ -255,7 +256,7 @@
       const rows = Object.keys(p.prices).map((s) => {
         const arr = p.prices[s];
         const li = arr.map((v) => v != null).lastIndexOf(true);
-        return li < 0 ? null : { s, v: arr[li], stale: li !== latest ? DB.dates[li].slice(5) : '' };
+        return li < 0 ? null : { s, v: arr[li], seller: ((p.notes || {})[s] || [])[li] || '', stale: li !== latest ? DB.dates[li].slice(5) : '' };
       }).filter(Boolean).sort((m, n) => m.v - n.v);
       $('#mBody').innerHTML = `${head}
         <div class="verdict ${a.judge}">${verdictText}</div>
@@ -266,8 +267,8 @@
           <div class="stat"><small>${unitLabel(p)} 가격</small><b>${fmtUnit(a)}원</b></div>
         </div>
         ${chart(p)}
-        <table><thead><tr><th>쇼핑몰</th><th class="r">현재가</th><th class="r">평균 대비</th><th></th></tr></thead><tbody>
-          ${rows.map((r) => `<tr><td>${esc(r.s)}${r.v === a.cur ? ' 🏆' : ''}${r.stale ? ` <small>(${r.stale} 기준)</small>` : ''}</td><td class="r">${won(r.v)}</td><td class="r">${pct((r.v - a.avg) / a.avg)}</td><td class="r"><a class="go" target="_blank" rel="noopener noreferrer" href="${esc(shopUrl(r.s))}">보러가기</a></td></tr>`).join('')}
+        <table><thead><tr><th>채널</th><th class="r">현재가(배송비 포함)</th><th class="r">평균 대비</th><th></th></tr></thead><tbody>
+          ${rows.map((r) => `<tr><td>${esc(r.s)}${r.seller ? ` <small>(${esc(r.seller)})</small>` : ''}${r.v === a.cur ? ' 🏆' : ''}${r.stale ? ` <small>(${r.stale} 기준)</small>` : ''}</td><td class="r">${won(r.v)}</td><td class="r">${pct((r.v - a.avg) / a.avg)}</td><td class="r"><a class="go" target="_blank" rel="noopener noreferrer" href="${esc(shopUrl(r.s))}">보러가기</a></td></tr>`).join('')}
         </tbody></table>${brandBox}`;
     }
     $('#modal').hidden = false;

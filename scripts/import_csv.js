@@ -1,7 +1,8 @@
 // 실제 가격 CSV를 data/products.json에 반영합니다.
 // 사용법: node scripts/import_csv.js prices.csv
-// CSV 형식(헤더 포함): date,productId,shop,price
-//   예) 2026-11-29,p001,쿠팡,24900
+// CSV 형식(헤더 포함): date,productId,shop,price[,seller]
+//   예) 2026-11-29,p001,네이버 최저가,19650,11번가
+// price는 배송비를 포함한 실구매가(원)로 적습니다. seller(판매처 메모)는 선택입니다.
 // 날짜는 과거→최신 순서로 넣어주세요. 새 날짜는 자동으로 추가됩니다.
 const fs = require('fs');
 const path = require('path');
@@ -16,7 +17,7 @@ const rows = fs.readFileSync(csvPath, 'utf8').split(/\r?\n/).filter(Boolean).sli
   .sort((a, b) => a[0].localeCompare(b[0]));
 
 let applied = 0, skipped = 0;
-for (const [date, pid, shop, priceStr] of rows) {
+for (const [date, pid, shop, priceStr, seller] of rows) {
   const price = parseInt(priceStr, 10);
   const p = db.products.find((x) => x.id === pid);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !p || !Number.isFinite(price) || price <= 0) { skipped++; continue; }
@@ -24,11 +25,19 @@ for (const [date, pid, shop, priceStr] of rows) {
   if (idx === -1) {
     if (date < db.dates[db.dates.length - 1]) { skipped++; continue; } // 과거 날짜 삽입은 미지원
     db.dates.push(date);
-    db.products.forEach((q) => Object.values(q.prices).forEach((arr) => arr.push(null)));
+    db.products.forEach((q) => {
+      Object.values(q.prices).forEach((arr) => arr.push(null));
+      Object.values(q.notes || {}).forEach((arr) => arr.push(null));
+    });
     idx = db.dates.length - 1;
   }
   if (!p.prices[shop]) p.prices[shop] = db.dates.map(() => null);
   p.prices[shop][idx] = price;
+  if (seller) {
+    p.notes = p.notes || {};
+    if (!p.notes[shop]) p.notes[shop] = db.dates.map(() => null);
+    p.notes[shop][idx] = seller;
+  }
   applied++;
 }
 db.sample = false; // 실제 데이터가 들어가면 샘플 안내 문구를 끕니다

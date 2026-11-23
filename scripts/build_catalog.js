@@ -10,7 +10,7 @@ const path = require('path');
 
 const shops = [
   { id: '쿠팡', url: 'https://www.coupang.com/np/search?q=' },
-  { id: '네이버쇼핑', url: 'https://search.shopping.naver.com/search/all?query=' },
+  { id: '네이버 최저가', url: 'https://search.shopping.naver.com/search/all?query=' },
 ];
 
 // tier(가격대)는 임시 분류입니다. 실제 단위가격이 쌓이면 재조정하세요.
@@ -72,13 +72,13 @@ add('etc', '존슨즈베이비', '존슨즈베이비 베드타임 로션 500ml',
 
 // 제품별 쇼핑몰 상품 페이지 링크 (추적 파라미터 없이 주소 앞부분만 저장)
 const link = (id, shop, url) => { products.find((p) => p.id === id).links = { ...(products.find((p) => p.id === id).links || {}), [shop]: url }; };
-link('p001', '네이버쇼핑', 'https://search.shopping.naver.com/catalog/59645004330');
+link('p001', '네이버 최저가', 'https://search.shopping.naver.com/catalog/59645004330');
 
 const out = { sample: false, generatedAt: new Date().toISOString().slice(0, 10), dates: [], shops, brands, products };
 fs.writeFileSync(path.join(__dirname, '..', 'data', 'products.json'), JSON.stringify(out));
 
-const lines = ['date,productId,shop,price,제품명(참고용)'];
-for (const p of products) for (const s of shops) lines.push(`${out.generatedAt},${p.id},${s.id},,${p.name.replace(/,/g, '')}`);
+const lines = ['date,productId,shop,price,판매처(메모),제품명(참고용)'];
+for (const p of products) for (const s of shops) lines.push(`${out.generatedAt},${p.id},${s.id},,,${p.name.replace(/,/g, '')}`);
 fs.writeFileSync(path.join(__dirname, '..', 'data', 'prices_template.csv'), lines.join('\n') + '\n');
 
 const used = new Set(products.map((p) => p.brand));
