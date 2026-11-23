@@ -191,3 +191,14 @@ td.r,th.r{text-align:right}
 
 .sub .long{display:none}
 @media (min-width:600px){.sub .long{display:inline}.sub .short{display:none}}
+
+/* 제품 썸네일(아이콘/사진) */
+.c-main{display:flex;gap:10px;align-items:flex-start}
+.c-text{min-width:0;display:flex;flex-direction:column;gap:4px;align-items:flex-start}
+.thumb{position:relative;flex:0 0 auto;width:56px;height:56px;border-radius:14px;background:#fff7f1;border:1px solid var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.thumb svg{width:70%;height:70%}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff}
+.thumb.formula{background:#f1f6ff}.thumb.pacifier{background:#f6f2ff}.thumb.bottle,.thumb.wipes{background:#f0fbf6}.thumb.tube{background:#fff2f5}
+.thumb.big{width:84px;height:84px;border-radius:18px}
+.m-head{display:flex;gap:12px;align-items:flex-start;margin-right:44px}
+.m-head h2{margin-right:0}

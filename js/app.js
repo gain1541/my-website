@@ -236,6 +236,20 @@
     return `<svg class="spark" viewBox="0 0 ${w} ${ht}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="#9b8cff" stroke-width="2" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="#ff8a65"/></svg>`;
   }
 
+
+  // 사진이 없을 때 쓰는 카테고리별 일러스트(직접 그린 아이콘)
+  const ICONS = {
+    diaper: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M5 11h38c1 13-5 26-13 30H18C10 37 4 24 5 11z" fill="#ffd9c9" stroke="#e8643b" stroke-width="2" stroke-linejoin="round"/><path d="M5 11h38v6H5z" fill="#fff" opacity=".75"/><circle cx="24" cy="29" r="3" fill="#fff" opacity=".8"/></svg>',
+    formula: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="11" y="14" width="26" height="29" rx="4" fill="#dbe9ff" stroke="#4a78d0" stroke-width="2"/><rect x="9" y="7" width="30" height="9" rx="3" fill="#fff" stroke="#4a78d0" stroke-width="2"/><circle cx="24" cy="29" r="6" fill="#fff" stroke="#4a78d0" stroke-width="2"/><path d="M21.5 29h5M24 26.5v5" stroke="#4a78d0" stroke-width="2" stroke-linecap="round"/></svg>',
+    pacifier: '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="12" r="7" fill="none" stroke="#7c6cf0" stroke-width="3"/><path d="M6 27c0-5 8-8 18-8s18 3 18 8-8 8-18 8S6 32 6 27z" fill="#e8e0ff" stroke="#7c6cf0" stroke-width="2"/><path d="M19 34c0 6 2 9 5 9s5-3 5-9" fill="#ffd9c9" stroke="#e8643b" stroke-width="2"/></svg>',
+    bottle: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M21 3h6l2 6H19z" fill="#ffd9c9" stroke="#e8643b" stroke-width="2" stroke-linejoin="round"/><rect x="16" y="9" width="16" height="6" rx="2" fill="#fff" stroke="#e8643b" stroke-width="2"/><path d="M15 15h18v26a4 4 0 0 1-4 4H19a4 4 0 0 1-4-4z" fill="#d6f2e8" stroke="#23805f" stroke-width="2"/><path d="M15 26h6M15 33h6" stroke="#23805f" stroke-width="2" stroke-linecap="round"/></svg>',
+    wipes: '<svg viewBox="0 0 48 48" aria-hidden="true"><rect x="7" y="18" width="34" height="24" rx="5" fill="#d6f2e8" stroke="#23805f" stroke-width="2"/><rect x="12" y="12" width="24" height="8" rx="3" fill="#fff" stroke="#23805f" stroke-width="2"/><path d="M18 12c0-5 4-7 8-7s5 3 3 6" fill="none" stroke="#23805f" stroke-width="2" stroke-linecap="round"/></svg>',
+    tube: '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 12h22l-2 28H15z" fill="#ffe3ea" stroke="#c0426b" stroke-width="2" stroke-linejoin="round"/><rect x="17" y="4" width="14" height="8" rx="2" fill="#fff" stroke="#c0426b" stroke-width="2"/><path d="M13 40h22v3H13z" fill="#c0426b"/><circle cx="24" cy="26" r="4" fill="#fff" opacity=".85"/></svg>',
+  };
+  const kindOf = (p) => (p.cat === 'etc' ? (p.type === '물티슈' ? 'wipes' : 'tube') : p.cat);
+  // image(권리가 확인된 사진)가 있으면 아이콘 위에 덮어서 보여주고, 불러오지 못하면 아이콘이 남습니다.
+  const thumbHtml = (p) => ICONS[kindOf(p)] + (p.image ? `<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.remove()">` : '');
+
   function renderActive() {
     const items = [];
     state.tier.forEach((v) => items.push(['tier', v, TIERS.find((t) => t.id === v).label]));
@@ -279,7 +293,7 @@
       const link = `<a class="mini" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 보기 ↗</a>`;
       const isFav = favs.has(p.id);
       const heart = `<button type="button" class="heart ${isFav ? 'on' : ''}" data-fav="${p.id}" aria-pressed="${isFav}" aria-label="${esc(p.name)} 관심 ${isFav ? '해제' : '추가'}">${isFav ? '♥' : '♡'}</button>`;
-      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><h3>${esc(p.name)}</h3>${p.age ? `<span class="age">${esc(p.age)}</span>` : ''}`;
+      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3>${esc(p.name)}</h3>${p.age ? `<span class="age">${esc(p.age)}</span>` : ''}</div></div>`;
       if (a.none) {
         return `<article class="card nodata" data-id="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} 상세 보기">${top('<span class="badge pending">대기</span>')}
           <div class="c-mid"><span class="price none">가격 수집 전</span></div>
@@ -330,7 +344,7 @@
     const p = DB.products.find((x) => x.id === id);
     const a = p.a;
     const b = DB.brands[p.brand];
-    const head = `<div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${p.age ? `<span class="age">대상: ${esc(p.age)}</span>` : ''}`;
+    const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${p.age ? `<span class="age">대상: ${esc(p.age)}</span>` : ''}</div></div>${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
     const btns = `<div class="btns"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a>${p.links && p.links.coupang ? (p.coupangNote ? '<p class="aff warn">' + esc(p.coupangNote) + '</p>' : '') + '<p class="aff">' + esc(AFF_TEXT) + '</p>' : ''}</div>`;
     const brandBox = b ? `<div class="binfo"><b>${esc(p.brand)}</b> ${tierTag(b.tier)} · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
 

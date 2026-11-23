@@ -97,6 +97,15 @@ if (fs.existsSync(dataFile)) {
   }
 }
 
+// img/ 폴더에 `p001.jpg`처럼 제품 ID로 저장한 사진을 자동 연결합니다(jpg/jpeg/png/webp).
+// 출처·이용 허락 표기는 img/credits.json에 {"p001": "하기스 제공"} 형태로 적습니다. 권리가 확인된 사진만 넣으세요.
+const imgDir = path.join(__dirname, '..', 'img');
+const credits = fs.existsSync(path.join(imgDir, 'credits.json')) ? JSON.parse(fs.readFileSync(path.join(imgDir, 'credits.json'), 'utf8')) : {};
+for (const p of products) {
+  const ext = ['jpg', 'jpeg', 'png', 'webp'].find((e) => fs.existsSync(path.join(imgDir, `${p.id}.${e}`)));
+  if (ext) { p.image = `img/${p.id}.${ext}`; if (credits[p.id]) p.imageCredit = credits[p.id]; }
+}
+
 const out = { sample: false, generatedAt: new Date().toISOString().slice(0, 10), brands, products };
 fs.writeFileSync(dataFile, JSON.stringify(out));
 
