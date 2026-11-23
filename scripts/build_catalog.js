@@ -109,7 +109,17 @@ for (const p of products) {
   if (ext) { p.image = `img/${p.id}.${ext}`; if (credits[p.id]) p.imageCredit = credits[p.id]; }
 }
 
-const out = { sample: false, generatedAt: new Date().toISOString().slice(0, 10), brands, products };
+// 기저귀 단계별 체중 기준(판매 페이지에 표기된 값만). 브랜드·라인마다 달라서 확인된 것만 넣고, 출처를 함께 적습니다.
+const weightGuide = {
+  rows: [
+    { title: '하기스 밴드형', items: [['1단계', '3~4.5kg'], ['2단계', '4~8kg'], ['3단계', '6~10kg'], ['4단계', '8~13kg'], ['5단계', '10~16kg']], src: '쇼핑몰 판매 페이지 표기 (3단계는 네이처밤부 밴드 표기). 팬티형은 기준이 달라요.' },
+    { title: '마미포코 꿀잠팬티', items: [['4단계', '10~14kg'], ['5단계', '13~18kg']], src: 'SSG 판매 페이지 라인업표. 에어핏 팬티는 확인되지 않았어요.' },
+  ],
+  general: '육아 정보 사이트의 일반적인 구간: 신생아 5kg 이하, S 4~8kg, M 6~11kg, L 9~14kg, 팬티 XL 12~17kg, XXL 15kg 이상 (브랜드마다 달라요)',
+  caution: '하기스·마미포코의 다른 라인과 팸퍼스, 보솜이는 체중 기준을 확인하지 못했어요. 포장 뒷면의 사이즈표를 꼭 확인하세요. 구간이 겹치면 체형에 따라 한 단계 위나 아래를 고르기도 해요.',
+};
+
+const out = { sample: false, generatedAt: new Date().toISOString().slice(0, 10), brands, weightGuide, products };
 fs.writeFileSync(dataFile, JSON.stringify(out));
 
 const unitName = (p) => `${p.basis === 1 ? '' : p.basis}${p.unit}당`;

@@ -275,13 +275,20 @@
       const hl = `left:${(band.a / AXIS) * 100}%;width:${((Math.min(band.b, AXIS) - band.a + 1) / AXIS) * 100}%`;
       return `<div class="bar2" aria-hidden="true"><span class="hl" style="${hl}"></span><i class="${p.months[1] == null ? 'open' : ''}" style="left:${(from / AXIS) * 100}%;width:${(Math.max(to - from, 0.6) / AXIS) * 100}%"></i></div>`;
     };
+    const weightHtml = () => {
+      const w = DB.weightGuide;
+      if (!w) return '';
+      return `<details class="wtable"><summary>단계별 체중 기준 보기</summary>` +
+        w.rows.map((r) => `<div class="wrow"><b>${esc(r.title)}</b><div class="wchips">${r.items.map(([s, k]) => `<span><em>${esc(s)}</em>${esc(k)}</span>`).join('')}</div><small>${esc(r.src)}</small></div>`).join('') +
+        `<p class="wnote">${esc(w.general)}</p><p class="wnote warn">${esc(w.caution)}</p></details>`;
+    };
     $('#gBody').innerHTML = GSECTIONS.map((sec) => {
       const items = DB.products.filter((p) => p.cat === sec.cat && overlap(p, band));
       const rows = sec.noList ? '' : (items.length
         ? `<div class="axis"><span></span><div><span>0</span><span>6</span><span>12</span><span>18</span><span>24개월</span></div></div>` + items.map((p) =>
           `<button class="gitem" data-id="${p.id}"><span class="gname"><small>${esc(p.brand)}</small>${esc(p.name)}${p.age ? ` <em class="age">${esc(p.age)}</em>` : ''}</span>${bar(p)}</button>`).join('')
         : (sec.cat === 'diaper' ? '' : `<p class="gempty">이 월령에 맞는 ${sec.title} 정보는 확인 중이에요.</p>`));
-      return `<section class="gsec"><h3>${sec.title}</h3><p class="gtip">${sec.tip}</p>${rows}</section>`;
+      return `<section class="gsec"><h3>${sec.title}</h3><p class="gtip">${sec.tip}</p>${sec.cat === 'diaper' ? weightHtml() : ''}${rows}</section>`;
     }).join('') + '<p class="basis">월령은 쇼핑몰 판매 페이지에 적힌 표기를 옮긴 참고용이에요. 예를 들어 0~6개월 제품은 6개월 전까지, 6~12개월 제품은 6개월부터예요. 아기마다 성장이 달라서 정확한 기준은 제품 포장에서 확인하세요. 월령이 확인된 제품만 표시돼요.</p>';
   }
   function openGuide() {
