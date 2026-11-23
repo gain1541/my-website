@@ -20,15 +20,24 @@
     { id: '가성비', label: '가성비' },
   ];
   const tierClass = { '상': 'hi', '중': 'mid', '가성비': 'low' };
-  const WINDOW = 26; // 평균 산출 기간(주)
-  const MIN_WEEKS = 4; // 판단에 필요한 최소 기록 주 수
+  const DAY = 86400000;
+  const WINDOW_DAYS = 182; // 평균 산출 기간(약 6개월)
+  const MIN_POINTS = 4; // 판단에 필요한 최소 기록 횟수
+  const MIN_SPAN = 21; // 판단에 필요한 최소 기록 기간(일)
   const TH = 0.05; // 판단 임계값 5%
+  const NAVER = 'https://search.shopping.naver.com/search/all?query=';
+  const COUPANG = 'https://www.coupang.com/np/search?q=';
 
   const $ = (s) => document.querySelector(s);
-  const won = (n) => n.toLocaleString('ko-KR') + '원';
+  const won = (n) => Math.round(n).toLocaleString('ko-KR') + '원';
+  const fmtU = (v) => (v >= 1000 ? Math.round(v).toLocaleString('ko-KR') : v.toFixed(1).replace(/\.0$/, ''));
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const tierOf = (p) => (DB.brands[p.brand] || {}).tier;
   const tierTag = (t) => (t ? `<span class="tier ${tierClass[t]}">${esc(t)}</span>` : '');
+  const unitLabel = (p) => `${p.basis === 1 ? '' : p.basis}${p.unit}당`;
+  const packPrice = (p, u) => Math.round((u * p.qty) / p.basis / 10) * 10; // 10원 단위 환산
+  const pct = (d) => (d > 0 ? '+' : '') + (d * 100).toFixed(1) + '%';
+  const uniq = (arr) => [...new Set(arr)];
 
   const state = { cat: 'diaper', tier: new Set(), brand: new Set(), type: new Set(), stage: new Set(), judge: new Set(), q: '', sort: 'diff' };
   let DB = null;
@@ -41,43 +50,31 @@
     });
 
   function analyze(p) {
-    const shops = Object.keys(p.prices);
-    const low = DB.dates.map((_, i) => {
-      let m = null;
-      for (const s of shops) {
-        const v = p.prices[s][i];
-        if (v != null && (m == null || v < m)) m = v;
-      }
-      return m;
-    });
-    const valid = low.filter((v) => v != null);
-    if (!valid.length) return { none: true, judge: 'pending', low, weeks: 0 };
-    const li = low.map((v) => v != null).lastIndexOf(true);
-    const cur = low[li];
-    const win = low.slice(-WINDOW).filter((v) => v != null);
-    const avg = win.reduce((a, b) => a + b, 0) / win.length;
-    const min = Math.min(...valid);
-    const max = Math.max(...valid);
+    const h = (p.history || []).slice().sort((a, b) => a.d.localeCompare(b.d));
+    if (!h.length) return { none: true, judge: 'pending', h };
+    const last = h[h.length - 1];
+    const lastT = Date.parse(last.d);
+    const win = h.filter((x) => lastT - Date.parse(x.d) <= WINDOW_DAYS * DAY);
+    const avg = win.reduce((a, x) => a + x.u, 0) / win.length;
+    const vals = h.map((x) => x.u);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const span = (lastT - Date.parse(h[0].d)) / DAY;
+    const pending = h.length < MIN_POINTS || span < MIN_SPAN;
+    const cur = last.u;
     const diff = (cur - avg) / avg;
-    const judge = valid.length < MIN_WEEKS ? 'pending' : diff <= -TH ? 'cheap' : diff >= TH ? 'pricey' : 'normal';
-    const unitPrice = cur / (p.qty / p.basis);
-    const bestShop = shops.find((s) => p.prices[s][li] === cur);
-    const seller = ((p.notes || {})[bestShop] || [])[li] || '';
-    return { low, cur, avg, min, max, diff, judge, unitPrice, bestShop, seller, weeks: valid.length, nearMin: valid.length >= MIN_WEEKS && cur <= min * 1.02 };
+    const judge = pending ? 'pending' : diff <= -TH ? 'cheap' : diff >= TH ? 'pricey' : 'normal';
+    return { h, cur, date: last.d, seller: last.s || '', avg, min, max, diff, judge, count: h.length, nearMin: !pending && cur <= min * 1.02 };
   }
 
   function init() {
     DB.products.forEach((p) => { p.a = analyze(p); });
-    const withData = DB.products.filter((p) => !p.a.none).length;
+    const withData = DB.products.filter((p) => !p.a.none);
     const notice = $('#sampleNotice');
-    if (DB.sample) {
-      notice.innerHTML = '⚠️ 현재 표시되는 가격은 <b>화면 확인용 샘플 데이터</b>예요. 실제 가격이 아닙니다.';
-      notice.hidden = false;
-    } else if (!withData) {
+    if (!withData.length) {
       notice.innerHTML = '📝 제품 목록만 먼저 공개했어요. <b>가격은 수집이 시작되면 표시</b>돼요.';
       notice.hidden = false;
-    } else if (DB.dates.length < MIN_WEEKS) {
-      notice.innerHTML = `📈 가격 수집 ${DB.dates.length}주차예요. <b>${MIN_WEEKS}주 이상 쌓이면</b> 싼지 비싼지 판단해 드려요.`;
+    } else if (withData.every((p) => p.a.judge === 'pending')) {
+      notice.innerHTML = `📈 가격 기록을 쌓는 중이에요. <b>기록이 ${MIN_POINTS}회 이상, 3주 이상</b> 쌓이면 싼지 비싼지 판단해 드려요.`;
       notice.hidden = false;
     }
 
@@ -117,7 +114,6 @@
   }
 
   const inCat = () => DB.products.filter((p) => p.cat === state.cat);
-  const uniq = (arr) => [...new Set(arr)];
 
   function chips(id, values, set, labelFn) {
     $('#' + id).innerHTML = values.map((v) =>
@@ -147,19 +143,16 @@
     }).join('') + `</div>`;
   }
 
-  function spark(vals, w = 220, h = 44) {
-    const n = Math.max(1, vals.length - 1);
-    const v = vals.filter((x) => x != null);
-    const lo = Math.min(...v), hi = Math.max(...v), rng = hi - lo || 1;
-    const pts = vals.map((x, i) => x == null ? null : [vals.length > 1 ? (i / n) * w : w / 2, h - 4 - ((x - lo) / rng) * (h - 8)]).filter(Boolean);
+  // 날짜 축 기준 미니 그래프
+  function spark(h, w = 220, ht = 44) {
+    const t0 = Date.parse(h[0].d), t1 = Date.parse(h[h.length - 1].d);
+    const vs = h.map((x) => x.u);
+    const lo = Math.min(...vs), hi = Math.max(...vs), rng = hi - lo || 1;
+    const pts = h.map((x) => [t1 > t0 ? ((Date.parse(x.d) - t0) / (t1 - t0)) * w : w / 2, ht - 4 - ((x.u - lo) / rng) * (ht - 8)]);
     const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
     const last = pts[pts.length - 1];
-    return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="#9b8cff" stroke-width="2" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="#ff8a65"/></svg>`;
+    return `<svg class="spark" viewBox="0 0 ${w} ${ht}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="#9b8cff" stroke-width="2" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="#ff8a65"/></svg>`;
   }
-
-  const pct = (d) => (d > 0 ? '+' : '') + (d * 100).toFixed(1) + '%';
-  const unitLabel = (p) => `${p.basis === 1 ? '' : p.basis}${p.unit}당`;
-  const fmtUnit = (a) => a.unitPrice.toFixed(a.unitPrice < 100 ? 1 : 0);
 
   function renderList() {
     let list = inCat().filter((p) => {
@@ -175,8 +168,7 @@
     const by = (fn) => (a, b) => (!!a.a.none - !!b.a.none) || (a.a.none ? a.name.localeCompare(b.name, 'ko') : fn(a, b));
     const sorters = {
       diff: by((a, b) => (a.a.judge === 'pending' ? 1 : 0) - (b.a.judge === 'pending' ? 1 : 0) || a.a.diff - b.a.diff),
-      unit: by((a, b) => a.a.unitPrice - b.a.unitPrice),
-      price: by((a, b) => a.a.cur - b.a.cur),
+      unit: by((a, b) => a.a.cur - b.a.cur),
       name: (a, b) => a.name.localeCompare(b.name, 'ko'),
     };
     list.sort(sorters[state.sort]);
@@ -190,43 +182,46 @@
       if (a.none) {
         return `<button class="card nodata" data-id="${p.id}">${head}
           <span class="meta"><span class="price none">가격 수집 전</span><span class="badge pending">대기</span></span>
-          <span class="unit">쇼핑몰 가격이 등록되면 표시돼요</span></button>`;
+          <span class="unit">가격이 등록되면 표시돼요</span></button>`;
       }
-      const note = a.judge === 'pending' ? `<span class="diff pending">기록 ${a.weeks}주 · ${MIN_WEEKS}주부터 판단</span>` : `<span class="diff ${a.judge}">평균 대비 ${pct(a.diff)}</span>`;
+      const note = a.judge === 'pending'
+        ? `<span class="diff pending">기록 ${a.count}회 · ${MIN_POINTS}회 이상부터 판단</span>`
+        : `<span class="diff ${a.judge}">평균 대비 ${pct(a.diff)}</span>`;
       return `<button class="card" data-id="${p.id}">${head}
-        <span class="meta"><span class="price">${won(a.cur)}</span><span class="badge ${a.judge}">${JL[a.judge]}</span></span>
-        <span class="unit">${unitLabel(p)} ${fmtUnit(a)}원 · 최저가 ${esc(a.bestShop)}${a.seller ? ` (${esc(a.seller)})` : ''}</span>
-        ${a.weeks > 1 ? spark(a.low) : ''}
-        <span class="meta">${note}${a.nearMin ? '<span class="low">역대 최저가 근접</span>' : ''}</span>
+        <span class="meta"><span class="price">${fmtU(a.cur)}원<small>${unitLabel(p)}</small></span><span class="badge ${a.judge}">${JL[a.judge]}</span></span>
+        <span class="unit">${p.qty.toLocaleString('ko-KR')}${p.unit} 기준 약 ${won(packPrice(p, a.cur))}${a.seller ? ` · ${esc(a.seller)}` : ''} · ${a.date.slice(5)} 기준</span>
+        ${a.count > 1 ? spark(a.h) : ''}
+        <span class="meta">${note}${a.nearMin ? '<span class="low">기록 중 최저가 근접</span>' : ''}</span>
       </button>`;
     }).join('');
   }
 
-  function chart(p) {
-    const a = p.a, W = 640, H = 240, L = 52, R = 12, T = 12, B = 28;
-    const vals = a.low;
-    const n = Math.max(1, vals.length - 1);
+  function chart(a) {
+    const W = 640, H = 240, L = 52, R = 12, T = 12, B = 28;
+    const h = a.h;
+    const t0 = Date.parse(h[0].d), t1 = Date.parse(h[h.length - 1].d);
     const lo = Math.min(a.min, a.avg) * 0.97, hi = a.max * 1.03, rng = hi - lo || 1;
-    const x = (i) => L + (i / n) * (W - L - R);
+    const x = (d) => (t1 > t0 ? L + ((Date.parse(d) - t0) / (t1 - t0)) * (W - L - R) : (L + W - R) / 2);
     const y = (v) => T + (1 - (v - lo) / rng) * (H - T - B);
-    const pts = vals.map((v, i) => (v == null ? null : [i, v])).filter(Boolean);
-    const d = pts.map(([i, v], k) => (k ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
+    const d = h.map((p, k) => (k ? 'L' : 'M') + x(p.d).toFixed(1) + ' ' + y(p.u).toFixed(1)).join(' ');
     let grid = '';
     for (let k = 0; k <= 3; k++) {
       const v = lo + (rng * k) / 3;
-      grid += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#eadfda" stroke-dasharray="3 3"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#8a8799">${(Math.round(v / 100) / 10).toFixed(1)}천</text>`;
+      grid += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#eadfda" stroke-dasharray="3 3"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="#8a8799">${fmtU(v)}</text>`;
     }
-    const mi = vals.indexOf(a.min);
-    const li = vals.map((v) => v != null).lastIndexOf(true);
-    const ticks = uniq([0, Math.floor(vals.length / 2), vals.length - 1]);
-    const xt = ticks.map((i) => `<text x="${x(i)}" y="${H - 8}" text-anchor="${i === 0 ? 'start' : i === vals.length - 1 ? 'end' : 'middle'}" font-size="11" fill="#8a8799">${DB.dates[i].slice(2)}</text>`).join('');
-    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="가격 추이 그래프">
+    const minP = h.find((p) => p.u === a.min);
+    const lastP = h[h.length - 1];
+    const ticks = uniq([h[0].d, lastP.d]);
+    const xt = ticks.map((dt, i) => `<text x="${x(dt)}" y="${H - 8}" text-anchor="${ticks.length === 1 ? 'middle' : i === 0 ? 'start' : 'end'}" font-size="11" fill="#8a8799">${dt.slice(2)}</text>`).join('');
+    const dots = h.map((p) => `<circle cx="${x(p.d)}" cy="${y(p.u)}" r="3" fill="#7c6cf0"/>`).join('');
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="단가 추이 그래프">
       ${grid}
       <line x1="${L}" x2="${W - R}" y1="${y(a.avg)}" y2="${y(a.avg)}" stroke="#ff8a65" stroke-dasharray="5 4"/>
-      <text x="${W - R}" y="${y(a.avg) - 5}" text-anchor="end" font-size="11" fill="#ff8a65">평균 ${won(Math.round(a.avg / 10) * 10)}</text>
+      <text x="${W - R}" y="${y(a.avg) - 5}" text-anchor="end" font-size="11" fill="#ff8a65">평균 ${fmtU(a.avg)}원</text>
       <path d="${d}" fill="none" stroke="#7c6cf0" stroke-width="2.4" stroke-linejoin="round"/>
-      <circle cx="${x(mi)}" cy="${y(a.min)}" r="4.5" fill="#2f9e75"/>
-      <circle cx="${x(li)}" cy="${y(a.cur)}" r="5" fill="#ff8a65"/>
+      ${dots}
+      <circle cx="${x(minP.d)}" cy="${y(minP.u)}" r="5" fill="#2f9e75"/>
+      <circle cx="${x(lastP.d)}" cy="${y(lastP.u)}" r="5.5" fill="#ff8a65"/>
       ${xt}
     </svg>`;
   }
@@ -235,40 +230,38 @@
     const p = DB.products.find((x) => x.id === id);
     const a = p.a;
     const b = DB.brands[p.brand];
-    const shopUrl = (s) => (p.links && p.links[s]) || (DB.shops.find((x) => x.id === s) || {}).url + encodeURIComponent(p.name);
+    const q = encodeURIComponent(p.name);
+    const naverUrl = (p.links && p.links.naver) || NAVER + q;
+    const coupangUrl = (p.links && p.links.coupang) || COUPANG + q;
     const head = `<div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>`;
+    const btns = `<div class="btns"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl)}">네이버 가격 비교 보기</a><a class="btn" target="_blank" rel="noopener noreferrer" href="${esc(coupangUrl)}">쿠팡에서 보기</a></div>`;
     const brandBox = b ? `<div class="binfo"><b>${esc(p.brand)}</b> ${tierTag(b.tier)} · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
 
     if (a.none) {
       $('#mBody').innerHTML = `${head}
-        <div class="verdict pending">아직 가격이 등록되지 않았어요. 수집이 시작되면 가격 추이와 판단을 보여드려요.</div>
-        <table><thead><tr><th>쇼핑몰</th><th class="r"></th></tr></thead><tbody>
-        ${DB.shops.map((s) => `<tr><td>${esc(s.id)}</td><td class="r"><a class="go" target="_blank" rel="noopener noreferrer" href="${esc(shopUrl(s.id))}">직접 검색</a></td></tr>`).join('')}
-        </tbody></table>${brandBox}`;
+        <div class="verdict pending">아직 가격이 등록되지 않았어요. 아래 버튼으로 현재 가격을 직접 확인해 보세요.</div>
+        ${btns}${brandBox}`;
     } else {
       const verdictText = {
-        pending: `가격 기록이 ${a.weeks}주치라 아직 판단을 보류해요. ${MIN_WEEKS}주 이상 쌓이면 평균과 비교해 알려드려요.`,
-        cheap: `지금 가격이 평균보다 ${Math.abs(a.diff * 100).toFixed(1)}% 저렴해요. 사기 좋은 타이밍이에요.`,
-        normal: `지금 가격은 평균과 비슷한 수준이에요(${pct(a.diff)}). 급하지 않다면 가격 추이를 더 지켜봐도 좋아요.`,
-        pricey: `지금 가격이 평균보다 ${(a.diff * 100).toFixed(1)}% 비싸요. 급하지 않다면 조금 기다려 보세요.`,
+        pending: `가격 기록이 ${a.count}회라 아직 판단을 보류해요. ${MIN_POINTS}회 이상, 3주 이상 쌓이면 평균과 비교해 알려드려요.`,
+        cheap: `지금 단가가 평균보다 ${Math.abs(a.diff * 100).toFixed(1)}% 저렴해요. 사기 좋은 타이밍이에요.`,
+        normal: `지금 단가는 평균과 비슷한 수준이에요(${pct(a.diff)}). 급하지 않다면 추이를 더 지켜봐도 좋아요.`,
+        pricey: `지금 단가가 평균보다 ${(a.diff * 100).toFixed(1)}% 비싸요. 급하지 않다면 조금 기다려 보세요.`,
       }[a.judge];
-      const latest = DB.dates.length - 1;
-      const rows = Object.keys(p.prices).map((s) => {
-        const arr = p.prices[s];
-        const li = arr.map((v) => v != null).lastIndexOf(true);
-        return li < 0 ? null : { s, v: arr[li], seller: ((p.notes || {})[s] || [])[li] || '', stale: li !== latest ? DB.dates[li].slice(5) : '' };
-      }).filter(Boolean).sort((m, n) => m.v - n.v);
+      const rows = a.h.slice().reverse().slice(0, 10);
       $('#mBody').innerHTML = `${head}
         <div class="verdict ${a.judge}">${verdictText}</div>
         <div class="stats">
-          <div class="stat"><small>현재 최저가</small><b>${won(a.cur)}</b></div>
-          <div class="stat"><small>평균(최근 ${Math.min(WINDOW, DB.dates.length)}주)</small><b>${won(Math.round(a.avg / 10) * 10)}</b></div>
-          <div class="stat"><small>기록 중 최저가</small><b>${won(a.min)}</b></div>
-          <div class="stat"><small>${unitLabel(p)} 가격</small><b>${fmtUnit(a)}원</b></div>
+          <div class="stat"><small>현재 ${unitLabel(p)}</small><b>${fmtU(a.cur)}원</b></div>
+          <div class="stat"><small>평균(최근 6개월)</small><b>${fmtU(a.avg)}원</b></div>
+          <div class="stat"><small>기록 중 최저</small><b>${fmtU(a.min)}원</b></div>
+          <div class="stat"><small>${p.qty.toLocaleString('ko-KR')}${p.unit} 기준 환산</small><b>약 ${won(packPrice(p, a.cur))}</b></div>
         </div>
-        ${chart(p)}
-        <table><thead><tr><th>채널</th><th class="r">현재가(배송비 포함)</th><th class="r">평균 대비</th><th></th></tr></thead><tbody>
-          ${rows.map((r) => `<tr><td>${esc(r.s)}${r.seller ? ` <small>(${esc(r.seller)})</small>` : ''}${r.v === a.cur ? ' 🏆' : ''}${r.stale ? ` <small>(${r.stale} 기준)</small>` : ''}</td><td class="r">${won(r.v)}</td><td class="r">${pct((r.v - a.avg) / a.avg)}</td><td class="r"><a class="go" target="_blank" rel="noopener noreferrer" href="${esc(shopUrl(r.s))}">보러가기</a></td></tr>`).join('')}
+        ${a.count > 1 ? chart(a) : ''}
+        <p class="basis">배송비를 포함한 시장 최저가를 ${unitLabel(p)} 가격으로 환산한 값이에요. 기준일 ${esc(a.date)}${a.seller ? ` · ${esc(a.seller)}` : ''}</p>
+        ${btns}
+        <table><thead><tr><th>기준일</th><th class="r">${unitLabel(p)} 가격</th><th class="r">판매처</th></tr></thead><tbody>
+          ${rows.map((r) => `<tr><td>${esc(r.d)}</td><td class="r">${fmtU(r.u)}원</td><td class="r">${esc(r.s || '-')}</td></tr>`).join('')}
         </tbody></table>${brandBox}`;
     }
     $('#modal').hidden = false;

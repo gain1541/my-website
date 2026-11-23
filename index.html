@@ -34,8 +34,7 @@
           <span>정렬</span>
           <select id="sort">
             <option value="diff">평균 대비 싼 순</option>
-            <option value="unit">단위가격 낮은 순</option>
-            <option value="price">가격 낮은 순</option>
+            <option value="unit">단가 낮은 순</option>
             <option value="name">이름순</option>
           </select>
         </label>
@@ -60,11 +59,10 @@
     <section class="panel how">
       <h2>가격 판단은 이렇게 해요</h2>
       <ul>
-        <li>쇼핑몰별 <b>가장 낮은 가격</b>을 주 단위로 모아 최근 26주 평균과 비교해요.</li>
-        <li>평균보다 5% 이상 낮으면 <span class="badge cheap">저렴</span>, 5% 이상 높으면 <span class="badge pricey">비쌈</span>, 그 사이는 <span class="badge normal">보통</span>이에요.</li>
-        <li>가격 기록이 <b>4주 미만</b>이면 정확한 비교가 어려워 <span class="badge pending">판단 보류</span>로 표시해요.</li>
-        <li>가격은 <b>배송비를 포함한 실구매가</b> 기준이에요. <b>네이버 최저가</b>는 네이버 가격비교의 최저가이고, 판매처는 매주 바뀔 수 있어요.</li>
-        <li>단위가격은 기저귀 1매, 분유 100g, 물티슈 1매 등으로 환산했어요.</li>
+        <li>가격은 <b>배송비를 포함한 시장 최저가</b>를 기저귀·물티슈는 1매, 분유는 100g당 같은 <b>단가</b>로 환산해 기록해요. 팩 구성이 달라도 단가로 비교할 수 있어요.</li>
+        <li>기록한 단가를 최근 6개월 평균과 비교해요. 평균보다 5% 이상 낮으면 <span class="badge cheap">저렴</span>, 5% 이상 높으면 <span class="badge pricey">비쌈</span>, 그 사이는 <span class="badge normal">보통</span>이에요.</li>
+        <li>기록이 <b>4회 미만이거나 3주 미만</b>이면 정확한 비교가 어려워 <span class="badge pending">판단 보류</span>로 표시해요.</li>
+        <li>실시간 가격과 쇼핑몰별 비교는 상세 화면의 <b>네이버 가격 비교 보기</b> 버튼으로 확인하세요.</li>
       </ul>
     </section>
   </main>

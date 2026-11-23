@@ -1,17 +1,12 @@
 // 제품 목록(카탈로그)과 가격 입력용 CSV 템플릿을 만듭니다.
 // 사용법: node scripts/build_catalog.js
-// 주의: data/products.json을 새로 만들기 때문에, 이미 가격을 입력했다면 덮어써집니다.
-//       (제품만 추가할 때는 data/products.json에 직접 항목을 추가하세요.)
+// 이미 입력한 가격 기록(history)은 제품명이 같으면 그대로 유지됩니다.
+// 제품명을 바꾸면 그 제품의 기록은 이어지지 않으니 주의하세요.
 //
 // 등록 기준: 쇼핑몰 판매 페이지에서 "제품명·단계·팩 구성(매수/용량)"이 확인된 것만 넣습니다.
 // 팩 구성이 다르면 가격 비교가 무의미하므로, 구성이 다른 상품은 별도 제품으로 등록하세요.
 const fs = require('fs');
 const path = require('path');
-
-const shops = [
-  { id: '쿠팡', url: 'https://www.coupang.com/np/search?q=' },
-  { id: '네이버 최저가', url: 'https://search.shopping.naver.com/search/all?query=' },
-];
 
 // tier(가격대)는 임시 분류입니다. 실제 단위가격이 쌓이면 재조정하세요.
 const brands = {
@@ -33,7 +28,7 @@ const brands = {
 const products = [];
 let n = 1;
 const add = (cat, brand, name, type, stage, qty, unit, basis = 1) =>
-  products.push({ id: 'p' + String(n++).padStart(3, '0'), cat, brand, name, type, stage, qty, unit, basis, prices: {} });
+  products.push({ id: 'p' + String(n++).padStart(3, '0'), cat, brand, name, type, stage, qty, unit, basis, history: [] });
 
 // 기저귀 (qty = 총 매수)
 add('diaper', '하기스', '하기스 네이처메이드 밴드형 1단계(신생아) 66매', '밴드형', '1단계(신생아)', 66, '매');
@@ -70,15 +65,28 @@ add('etc', '베베숲', '베베숲 센시티브 캡형 80매×10팩', '물티슈
 add('etc', '아토팜', '아토팜 MLE 크림 160ml', '로션·크림', '전연령', 160, 'ml', 100);
 add('etc', '존슨즈베이비', '존슨즈베이비 베드타임 로션 500ml', '로션·크림', '전연령', 500, 'ml', 100);
 
-// 제품별 쇼핑몰 상품 페이지 링크 (추적 파라미터 없이 주소 앞부분만 저장)
-const link = (id, shop, url) => { products.find((p) => p.id === id).links = { ...(products.find((p) => p.id === id).links || {}), [shop]: url }; };
-link('p001', '네이버 최저가', 'https://search.shopping.naver.com/catalog/59645004330');
+// 제품별 쇼핑몰 상품 페이지 링크 (추적 파라미터 없이 주소 앞부분만 저장). key: naver | coupang
+const link = (id, key, url) => { const p = products.find((x) => x.id === id); p.links = { ...(p.links || {}), [key]: url }; };
+link('p001', 'naver', 'https://search.shopping.naver.com/catalog/59645004330');
 
-const out = { sample: false, generatedAt: new Date().toISOString().slice(0, 10), dates: [], shops, brands, products };
-fs.writeFileSync(path.join(__dirname, '..', 'data', 'products.json'), JSON.stringify(out));
+// 이미 입력한 가격 기록은 제품명 기준으로 보존합니다.
+const dataFile = path.join(__dirname, '..', 'data', 'products.json');
+if (fs.existsSync(dataFile)) {
+  const old = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+  const byName = new Map((old.products || []).map((p) => [p.name, p]));
+  for (const p of products) {
+    const o = byName.get(p.name);
+    if (o && Array.isArray(o.history)) p.history = o.history;
+    if (o && o.links) for (const k of ['naver', 'coupang']) if (o.links[k]) p.links = { ...p.links, [k]: o.links[k] };
+  }
+}
 
-const lines = ['date,productId,shop,price,판매처(메모),제품명(참고용)'];
-for (const p of products) for (const s of shops) lines.push(`${out.generatedAt},${p.id},${s.id},,,${p.name.replace(/,/g, '')}`);
+const out = { sample: false, generatedAt: new Date().toISOString().slice(0, 10), brands, products };
+fs.writeFileSync(dataFile, JSON.stringify(out));
+
+const unitName = (p) => `${p.basis === 1 ? '' : p.basis}${p.unit}당`;
+const lines = ['date,productId,unitPrice,seller,제품명(참고용),단가 단위(참고용)'];
+for (const p of products) lines.push(`${out.generatedAt},${p.id},,,${p.name.replace(/,/g, '')},${unitName(p)}`);
 fs.writeFileSync(path.join(__dirname, '..', 'data', 'prices_template.csv'), lines.join('\n') + '\n');
 
 const used = new Set(products.map((p) => p.brand));
