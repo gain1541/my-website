@@ -20,7 +20,7 @@ const shops = [
 ];
 
 const brands = {
-  하기스: { tier: '중', cats: ['diaper', 'wipes'], tagline: '국내 대표 기저귀 브랜드', pros: ['라인업이 다양해 단계·타입 선택 폭이 넓음', '대형마트·온라인 어디서나 구하기 쉬움', '프로모션이 잦아 가격 변동이 큰 편'] },
+  하기스: { tier: '중', cats: ['diaper', 'etc'], tagline: '국내 대표 기저귀 브랜드', pros: ['라인업이 다양해 단계·타입 선택 폭이 넓음', '대형마트·온라인 어디서나 구하기 쉬움', '프로모션이 잦아 가격 변동이 큰 편'] },
   팸퍼스: { tier: '상', cats: ['diaper'], tagline: '글로벌 브랜드, 흡수력 강조', pros: ['흡수력·보송함을 강점으로 내세움', '신생아용 라인이 세분화되어 있음', '프리미엄 가격대'] },
   보솜이: { tier: '가성비', cats: ['diaper'], tagline: '국내 중저가 가성비 브랜드', pros: ['상대적으로 낮은 단가', '순한 소재를 강조하는 라인 보유', '대용량 구성이 많음'] },
   군: { tier: '상', cats: ['diaper'], tagline: '통기성·피부 편의를 강조하는 브랜드', pros: ['얇고 통기성 있는 설계를 강조', '피부가 예민한 아기 후기가 많음'] },
@@ -29,11 +29,18 @@ const brands = {
   매일: { tier: '중', cats: ['formula'], tagline: '앱솔루트 등 대표 분유', pros: ['단계별 라인업이 촘촘함', '대형 유통 채널에서 구하기 쉬움'] },
   일동: { tier: '상', cats: ['formula'], tagline: '아이엠마더 등 프리미엄 분유', pros: ['성분 설계를 강조하는 라인', '프로모션·샘플 이벤트가 잦은 편'] },
   파스퇴르: { tier: '상', cats: ['formula'], tagline: '유기농·청정 원유 강조', pros: ['원유 품질을 강조', '프리미엄 이미지'] },
-  몽드드: { tier: '상', cats: ['wipes'], tagline: '프리미엄 물티슈', pros: ['원단 품질과 순한 성분 강조', '캡형/리필 구성 다양'] },
-  베베숲: { tier: '중', cats: ['wipes'], tagline: '순한 성분의 아기 물티슈', pros: ['무향·저자극을 강조', '대량 박스 구성으로 장당 단가가 낮음'] },
-  더블하트: { tier: '중', cats: ['etc'], tagline: '젖병·수유용품 전문', pros: ['모유실감 젖꼭지 라인 보유', '교체용 부품 구하기 쉬움'] },
-  유팡: { tier: '가성비', cats: ['etc'], tagline: '젖병·세정제·케어 용품', pros: ['세정제·젖병 라인 다양', '대용량 리필 구성'] },
+  누크: { tier: '상', cats: ['pacifier'], tagline: '교정 형태 쪽쪽이로 알려진 독일 브랜드', pros: ['구강 구조를 고려한 형태를 강조', '월령별 사이즈가 구분됨'] },
+  아벤트: { tier: '중', cats: ['pacifier', 'bottle'], tagline: '쪽쪽이·젖병을 함께 파는 글로벌 브랜드', pros: ['쪽쪽이·젖병 호환 라인이 다양', '오프라인·온라인 구하기 쉬움'] },
+  닥터브라운: { tier: '상', cats: ['pacifier', 'bottle'], tagline: '배앓이 방지 설계를 내세운 젖병 브랜드', pros: ['통기 시스템을 강조한 젖병', '쪽쪽이·젖병 라인 모두 보유', '부품이 많아 세척이 번거로울 수 있음'] },
+  더블하트: { tier: '중', cats: ['bottle', 'pacifier'], tagline: '젖병·수유용품 전문 국내 브랜드', pros: ['모유실감 젖꼭지 라인 보유', '교체용 부품 구하기 쉬움', '국내 브랜드 중 가격대가 합리적'] },
+  컴포타: { tier: '가성비', cats: ['bottle'], tagline: '가성비 젖병 브랜드', pros: ['합리적인 가격의 PP/PPSU 젖병', '입문용으로 쓰기 좋음'] },
+  몽드드: { tier: '상', cats: ['etc'], tagline: '프리미엄 물티슈', pros: ['원단 품질과 순한 성분 강조', '캡형/리필 구성 다양'] },
+  베베숲: { tier: '중', cats: ['etc'], tagline: '순한 성분의 아기 물티슈', pros: ['무향·저자극을 강조', '대량 박스 구성으로 장당 단가가 낮음'] },
+  아토팜: { tier: '상', cats: ['etc'], tagline: '피부 보습 전문 베이비 스킨케어', pros: ['보습 크림·로션 라인이 다양', '민감 피부용으로 인지도가 높음'] },
+  존슨즈베이비: { tier: '중', cats: ['etc'], tagline: '글로벌 베이비 케어 브랜드', pros: ['로션·샴푸 등 라인이 폭넓음', '대형마트에서 구하기 쉬움'] },
+  세타필: { tier: '중', cats: ['etc'], tagline: '민감 피부용 보습 스킨케어', pros: ['저자극 보습을 강조', '대용량 구성이 있어 단가가 유리'] },
   피죤: { tier: '가성비', cats: ['etc'], tagline: '세제·섬유 케어 브랜드', pros: ['아기 세탁용 라인 보유', '대용량 가성비'] },
+  마더케이: { tier: '중', cats: ['etc'], tagline: '젖병·아기 세정용품 브랜드', pros: ['젖병·장난감 세정제 라인', '리필 구성이 있어 단가가 낮음'] },
 };
 
 const products = [];
@@ -88,25 +95,58 @@ for (const l of formulaLines) {
   }
 }
 
-// 물티슈
+// 쪽쪽이
 for (const l of [
-  { brand: '몽드드', line: '프리미엄 캡형', type: '캡형', qty: 70, packs: 10, base: 1800 },
-  { brand: '몽드드', line: '프리미엄 리필형', type: '리필형', qty: 80, packs: 10, base: 1500 },
-  { brand: '베베숲', line: '무향 캡형', type: '캡형', qty: 80, packs: 10, base: 1400 },
-  { brand: '베베숲', line: '무향 리필형', type: '리필형', qty: 100, packs: 10, base: 1250 },
-  { brand: '하기스', line: '네이처메이드 캡형', type: '캡형', qty: 72, packs: 10, base: 1900 },
+  { brand: '누크', line: '제니우스 실리콘', base: 9500 },
+  { brand: '아벤트', line: '울트라 소프트', base: 11500 },
+  { brand: '닥터브라운', line: '해피 패시', base: 10500 },
+  { brand: '더블하트', line: '모유실감 쪽쪽이', base: 8500 },
 ]) {
-  add({ cat: 'wipes', brand: l.brand, name: `${l.brand} ${l.line} ${l.qty}매 x ${l.packs}팩`, type: l.type, stage: '전연령', qty: l.qty * l.packs, unit: '매', basis: 1, base: l.base * l.packs });
+  for (const st of [{ stage: '신생아(0~5개월)', f: 1 }, { stage: '6개월+', f: 1.02 }]) {
+    add({ cat: 'pacifier', brand: l.brand, name: `${l.brand} ${l.line} ${st.stage} 2P`, type: l.line.includes('실리콘') || l.line.includes('소프트') ? '실리콘' : '교정형', stage: st.stage, qty: 2, unit: '개', basis: 1, base: Math.round(l.base * st.f) });
+  }
 }
 
-// 기타 육아용품
+// 분유병(젖병)
 for (const l of [
-  { brand: '더블하트', name: '더블하트 모유실감 젖병 240ml 2P', type: '젖병', base: 21000, qty: 2, unit: '개' },
-  { brand: '더블하트', name: '더블하트 모유실감 젖꼭지 4P', type: '젖꼭지', base: 12500, qty: 4, unit: '개' },
-  { brand: '유팡', name: '유팡 젖병세정제 리필 1,000ml', type: '세정제', base: 11800, qty: 1000, unit: 'ml', basis: 100 },
-  { brand: '피죤', name: '피죤 아기 전용 세제 2.5L', type: '세탁세제', base: 14900, qty: 2500, unit: 'ml', basis: 100 },
+  { brand: '더블하트', name: '더블하트 모유실감 PPSU 젖병 240ml', type: 'PPSU', base: 21000, qty: 1 },
+  { brand: '더블하트', name: '더블하트 모유실감 PPSU 젖병 160ml 2P', type: 'PPSU', base: 25000, qty: 2 },
+  { brand: '더블하트', name: '더블하트 모유실감 젖꼭지 4P', type: '젖꼭지', base: 12500, qty: 4 },
+  { brand: '닥터브라운', name: '닥터브라운 옵션스+ 젖병 270ml', type: 'PP', base: 19000, qty: 1 },
+  { brand: '닥터브라운', name: '닥터브라운 내추럴 플로우 젖꼭지 2P', type: '젖꼭지', base: 11000, qty: 2 },
+  { brand: '아벤트', name: '아벤트 내추럴 젖병 260ml 2P', type: 'PP', base: 22000, qty: 2 },
+  { brand: '아벤트', name: '아벤트 내추럴 젖꼭지 2P', type: '젖꼭지', base: 9500, qty: 2 },
+  { brand: '컴포타', name: '컴포타 PPSU 젖병 240ml 2P', type: 'PPSU', base: 18000, qty: 2 },
+  { brand: '컴포타', name: '컴포타 유리 젖병 240ml', type: '유리', base: 11000, qty: 1 },
 ]) {
-  add({ cat: 'etc', brand: l.brand, name: l.name, type: l.type, stage: '전연령', qty: l.qty, unit: l.unit, basis: l.basis || 1, base: l.base });
+  add({ cat: 'bottle', brand: l.brand, name: l.name, type: l.type, stage: '전연령', qty: l.qty, unit: '개', basis: 1, base: l.base });
+}
+
+// 기타 용품: 물티슈 / 로션·크림 / 세제
+for (const l of [
+  { brand: '몽드드', line: '프리미엄 캡형', qty: 70, packs: 10, base: 1800 },
+  { brand: '몽드드', line: '프리미엄 리필형', qty: 80, packs: 10, base: 1500 },
+  { brand: '베베숲', line: '무향 캡형', qty: 80, packs: 10, base: 1400 },
+  { brand: '베베숲', line: '무향 리필형', qty: 100, packs: 10, base: 1250 },
+  { brand: '하기스', line: '네이처메이드 캡형', qty: 72, packs: 10, base: 1900 },
+]) {
+  add({ cat: 'etc', brand: l.brand, name: `${l.brand} ${l.line} ${l.qty}매 x ${l.packs}팩`, type: '물티슈', stage: '전연령', qty: l.qty * l.packs, unit: '매', basis: 1, base: l.base * l.packs });
+}
+for (const l of [
+  { brand: '아토팜', name: '아토팜 MLE 크림 160ml', type: '로션·크림', base: 27000, qty: 160 },
+  { brand: '아토팜', name: '아토팜 탑투토 워시 400ml', type: '로션·크림', base: 18500, qty: 400 },
+  { brand: '존슨즈베이비', name: '존슨즈베이비 로션 500ml', type: '로션·크림', base: 9800, qty: 500 },
+  { brand: '세타필', name: '세타필 베이비 데일리 로션 399ml', type: '로션·크림', base: 15900, qty: 399 },
+]) {
+  add({ cat: 'etc', brand: l.brand, name: l.name, type: l.type, stage: '전연령', qty: l.qty, unit: 'ml', basis: 100, base: l.base });
+}
+for (const l of [
+  { brand: '피죤', name: '피죤 아기 전용 세제 2.5L', type: '세탁세제', base: 14900, qty: 2500 },
+  { brand: '피죤', name: '피죤 아기 섬유유연제 2.5L', type: '섬유유연제', base: 12900, qty: 2500 },
+  { brand: '마더케이', name: '마더케이 젖병세정제 리필 1,000ml', type: '젖병세정제', base: 11800, qty: 1000 },
+  { brand: '마더케이', name: '마더케이 젖병세정제 용기 500ml', type: '젖병세정제', base: 7900, qty: 500 },
+]) {
+  add({ cat: 'etc', brand: l.brand, name: l.name, type: l.type, stage: '전연령', qty: l.qty, unit: 'ml', basis: 100, base: l.base });
 }
 
 // 가격 시계열 생성

@@ -2,10 +2,11 @@
   const CATS = [
     { id: 'diaper', label: '기저귀' },
     { id: 'formula', label: '분유' },
-    { id: 'wipes', label: '물티슈' },
-    { id: 'etc', label: '기타 육아용품' },
+    { id: 'pacifier', label: '쪽쪽이' },
+    { id: 'bottle', label: '분유병(젖병)' },
+    { id: 'etc', label: '기타 용품' },
   ];
-  const STAGE_ORDER = ['신생아', '1단계', '2단계', '3단계', '4단계', '5단계', '전연령'];
+  const STAGE_ORDER = ['신생아', '신생아(0~5개월)', '6개월+', '1단계', '2단계', '3단계', '4단계', '5단계', '전연령'];
   const JUDGES = [
     { id: 'cheap', label: '저렴' },
     { id: 'normal', label: '보통' },
