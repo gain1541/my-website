@@ -78,6 +78,9 @@ meta('p014', { age: '12~24개월' });
 meta('p015', { age: '0~6개월' });
 meta('p020', { age: '0~6개월' });
 meta('p021', { age: '12개월~' });
+// months: [시작월, 끝월|null]  판매 페이지에 월령이 명시된 제품만 입력합니다(월령 가이드에 사용). null은 '이후 계속'.
+const MONTHS = { p001: [0, 1], p007: [0, 1], p009: [0, 3], p011: [12, 24], p012: [0, 6], p013: [6, 12], p014: [12, 24], p015: [0, 6], p020: [0, 6], p021: [12, null], p022: [0, 6], p023: [6, 18] };
+for (const [id, m] of Object.entries(MONTHS)) meta(id, { months: m });
 const SEARCH_NOTE = '쿠팡 검색 결과로 이동해요. 수량·라인이 다를 수 있으니 구성을 확인하세요.';
 ['p008', 'p018', 'p020', 'p021', 'p028'].forEach((id) => meta(id, { coupangNote: SEARCH_NOTE }));
 

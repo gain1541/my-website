@@ -137,6 +137,15 @@
       if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('card')) { e.preventDefault(); open(e.target); }
     });
     $('#mClose').addEventListener('click', closeLayer);
+    $('#openGuide').addEventListener('click', openGuide);
+    $('#gClose').addEventListener('click', closeLayer);
+    $('#guide').addEventListener('click', (e) => {
+      if (e.target.id === 'guide') { closeLayer(); return; }
+      const bb = e.target.closest('[data-b]');
+      if (bb) { gBand = bb.dataset.b; renderGuide(); return; }
+      const it = e.target.closest('.gitem');
+      if (it) { $('#guide').hidden = true; openModal(it.dataset.id); }
+    });
     $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeLayer(); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLayer(); });
     window.addEventListener('popstate', hideAll);
@@ -178,6 +187,7 @@
   function pushLayer(k) { try { history.pushState({ layer: k }, ''); } catch (e) { /* 무시 */ } }
   function hideAll() {
     $('#modal').hidden = true;
+    $('#guide').hidden = true;
     $('#side').classList.remove('open');
     document.body.style.overflow = '';
   }
@@ -236,6 +246,51 @@
     return `<svg class="spark" viewBox="0 0 ${w} ${ht}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="#9b8cff" stroke-width="2" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="#ff8a65"/></svg>`;
   }
 
+
+
+  // ---------- 월령 가이드 ----------
+  const BANDS = [
+    { id: '0', label: '0~2개월', a: 0, b: 2 },
+    { id: '1', label: '3~5개월', a: 3, b: 5 },
+    { id: '2', label: '6~11개월', a: 6, b: 11 },
+    { id: '3', label: '12~24개월', a: 12, b: 24 },
+  ];
+  const AXIS = 24; // 막대 그래프 범위(개월)
+  let gBand = '0';
+  // 월령 범위는 "시작 이상 ~ 끝 미만"으로 봅니다(예: 0~6개월은 6개월 전까지, 6~12개월은 6개월부터). 24개월 이상으로 끝나면 끝 월까지 포함.
+  const monthMatch = (p, m) => p.months && m >= p.months[0] && (p.months[1] == null || m < p.months[1] || (p.months[1] >= 24 && m <= p.months[1]));
+  const overlap = (p, band) => { for (let m = band.a; m <= band.b; m++) if (monthMatch(p, m)) return true; return false; };
+  const GSECTIONS = [
+    { cat: 'diaper', title: '기저귀', tip: '기저귀는 월령보다 <b>체중</b>으로 단계를 골라요. 단계별 체중 기준은 브랜드마다 달라서 포장의 체중 기준을 꼭 확인하세요.' },
+    { cat: 'formula', title: '분유', tip: '분유 단계의 월령은 <b>브랜드마다 달라요.</b> 아래는 판매 페이지에 적힌 월령이에요.' },
+    { cat: 'pacifier', title: '쪽쪽이', tip: '쪽쪽이는 월령별 사이즈(S1, S2)를 맞춰 쓰는 제품이에요.' },
+    { cat: 'bottle', title: '분유병(젖병)', tip: '젖병은 월령보다 <b>수유량</b>에 맞춰 용량을 고르고, 젖꼭지는 <b>단계(유속)가 따로</b> 있어요. 예를 들어 닥터브라운 옵션스+는 1단계가 기본으로 들어 있고 2·3단계는 따로 사요.', noList: true },
+  ];
+
+  function renderGuide() {
+    const band = BANDS.find((x) => x.id === gBand);
+    $('#gBands').innerHTML = BANDS.map((x) => `<button class="chip ${x.id === gBand ? 'on' : ''}" data-b="${x.id}" aria-pressed="${x.id === gBand}">${x.label}</button>`).join('');
+    const bar = (p) => {
+      const from = p.months[0], to = p.months[1] == null ? AXIS : Math.min(p.months[1], AXIS);
+      const hl = `left:${(band.a / AXIS) * 100}%;width:${((Math.min(band.b, AXIS) - band.a + 1) / AXIS) * 100}%`;
+      return `<div class="bar2" aria-hidden="true"><span class="hl" style="${hl}"></span><i class="${p.months[1] == null ? 'open' : ''}" style="left:${(from / AXIS) * 100}%;width:${(Math.max(to - from, 0.6) / AXIS) * 100}%"></i></div>`;
+    };
+    $('#gBody').innerHTML = GSECTIONS.map((sec) => {
+      const items = DB.products.filter((p) => p.cat === sec.cat && overlap(p, band));
+      const rows = sec.noList ? '' : (items.length
+        ? `<div class="axis"><span></span><div><span>0</span><span>6</span><span>12</span><span>18</span><span>24개월</span></div></div>` + items.map((p) =>
+          `<button class="gitem" data-id="${p.id}"><span class="gname"><small>${esc(p.brand)}</small>${esc(p.name)}${p.age ? ` <em class="age">${esc(p.age)}</em>` : ''}</span>${bar(p)}</button>`).join('')
+        : (sec.cat === 'diaper' ? '' : `<p class="gempty">이 월령에 맞는 ${sec.title} 정보는 확인 중이에요.</p>`));
+      return `<section class="gsec"><h3>${sec.title}</h3><p class="gtip">${sec.tip}</p>${rows}</section>`;
+    }).join('') + '<p class="basis">월령은 쇼핑몰 판매 페이지에 적힌 표기를 옮긴 참고용이에요. 예를 들어 0~6개월 제품은 6개월 전까지, 6~12개월 제품은 6개월부터예요. 아기마다 성장이 달라서 정확한 기준은 제품 포장에서 확인하세요. 월령이 확인된 제품만 표시돼요.</p>';
+  }
+  function openGuide() {
+    renderGuide();
+    $('#guide').hidden = false;
+    document.body.style.overflow = 'hidden';
+    $('#guide .sheet').scrollTop = 0;
+    pushLayer('guide');
+  }
 
   // 사진이 없을 때 쓰는 카테고리별 일러스트(직접 그린 아이콘)
   const ICONS = {

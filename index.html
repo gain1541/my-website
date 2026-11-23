@@ -14,9 +14,12 @@
 </head>
 <body>
   <header class="top">
-    <div class="wrap">
-      <h1>🍼 아기쇼핑 가격비교</h1>
-      <p class="sub"><span class="long">기저귀 <b>1매당</b>·분유 <b>100g당</b> 가격으로 지금이 싼지 비싼지 알려드려요</span><span class="short"><b>1매당·100g당</b> 단가로 싼지 비싼지 확인</span> · <a href="#faq">사용법</a></p>
+    <div class="wrap top-in">
+      <div>
+        <h1>🍼 아기쇼핑 가격비교</h1>
+        <p class="sub"><span class="long">기저귀 <b>1매당</b>·분유 <b>100g당</b> 가격으로 지금이 싼지 비싼지 알려드려요</span><span class="short"><b>1매당·100g당</b> 단가로 싼지 비싼지 확인</span> · <a href="#faq">사용법</a></p>
+      </div>
+      <button id="openGuide" class="gbtn" type="button" aria-haspopup="dialog">👶 월령 가이드</button>
     </div>
   </header>
 
@@ -128,6 +131,16 @@
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle">
       <button class="close" id="mClose" aria-label="닫기">✕</button>
       <div id="mBody"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="guide" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gTitle">
+      <button class="close" id="gClose" aria-label="닫기">✕</button>
+      <h2 id="gTitle">👶 월령 가이드</h2>
+      <p class="gsub">우리 아기 월령을 고르면 맞는 제품을 한눈에 보여드려요.</p>
+      <div class="chips gbands" id="gBands"></div>
+      <div id="gBody"></div>
     </div>
   </div>
 
