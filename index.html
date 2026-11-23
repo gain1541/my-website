@@ -3,68 +3,93 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>아기쇼핑 가격비교 - 육아용품 최저가 추이</title>
-  <meta name="description" content="기저귀·분유·물티슈 등 육아용품의 쇼핑몰별 가격과 과거 가격 추이를 비교해 지금 사도 되는지 알려드려요.">
+  <title>아기쇼핑 가격비교 - 육아용품 단가 추이</title>
+  <meta name="description" content="기저귀·분유·쪽쪽이·젖병 등 육아용품의 시장 최저 단가 추이를 보고, 지금 가격이 싼지 비싼지 확인하세요.">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header class="top">
     <div class="wrap">
       <h1>🍼 아기쇼핑 가격비교</h1>
-      <p class="sub">쇼핑몰별 가격과 과거 추이로 <b>지금 가격이 싼지 비싼지</b> 알려드려요</p>
+      <p class="sub">지금 가격이 <b>싼지 비싼지</b> 단가 추이로 알려드려요</p>
     </div>
   </header>
 
   <div id="sampleNotice" class="notice" hidden>
-    ⚠️ 현재 표시되는 가격은 <b>화면 확인용 샘플 데이터</b>예요. 실제 가격이 아닙니다.
+    <span id="noticeText"></span>
+    <button id="noticeClose" type="button" aria-label="안내 닫기">✕</button>
+  </div>
+
+  <div class="stick" id="stick">
+    <div class="wrap">
+      <nav class="tabs" id="tabs" aria-label="카테고리"></nav>
+      <div class="bar">
+        <label class="search">
+          <span class="sr">검색</span>
+          <input id="q" type="search" placeholder="브랜드·제품명 검색" enterkeyhint="search">
+        </label>
+        <button id="openFilter" class="fbtn" type="button" aria-haspopup="dialog">필터<span id="fCount" class="fcount" hidden></span></button>
+      </div>
+      <div class="quick" id="quick" aria-label="브랜드 빠른 선택"></div>
+    </div>
   </div>
 
   <main class="wrap">
-    <nav class="tabs" id="tabs" aria-label="카테고리"></nav>
-
     <div class="layout">
-    <aside class="side">
-    <section class="panel" id="filters">
-      <div class="row">
-        <label class="field grow">
-          <span>검색</span>
-          <input id="q" type="search" placeholder="브랜드·제품명 검색">
-        </label>
-        <label class="field">
-          <span>정렬</span>
-          <select id="sort">
-            <option value="diff">평균 대비 싼 순</option>
-            <option value="unit">단가 낮은 순</option>
-            <option value="name">이름순</option>
-          </select>
-        </label>
+      <aside class="side" id="side" aria-label="필터">
+        <section class="panel" id="filters" role="dialog" aria-label="필터">
+          <div class="sheet-head">
+            <b>필터</b>
+            <button id="sheetClose" type="button" aria-label="닫기">✕</button>
+          </div>
+          <label class="field">
+            <span>정렬</span>
+            <select id="sort">
+              <option value="diff">평균 대비 싼 순</option>
+              <option value="unit">단가 낮은 순</option>
+              <option value="name">이름순</option>
+            </select>
+          </label>
+          <div class="group"><b>브랜드</b><div class="chips" id="fBrand"></div></div>
+          <div class="group"><b>브랜드 가격대</b><div class="chips" id="fTier"></div></div>
+          <div class="group"><b>종류</b><div class="chips" id="fType"></div></div>
+          <div class="group"><b>단계</b><div class="chips" id="fStage"></div></div>
+          <div class="group"><b>가격 판단</b><div class="chips" id="fJudge"></div></div>
+          <button id="reset" class="link" type="button">필터 초기화</button>
+          <div class="sheet-foot">
+            <button id="resetM" class="btn" type="button">초기화</button>
+            <button id="applyM" class="btn primary" type="button">제품 보기</button>
+          </div>
+        </section>
+      </aside>
+
+      <div class="content">
+        <details id="brandInfo" class="panel brandbox">
+          <summary>브랜드 특징 <span id="brandCount" class="muted"></span></summary>
+          <div class="brands" id="brands"></div>
+        </details>
+
+        <div class="listhead">
+          <div class="count" id="count" role="status" aria-live="polite"></div>
+          <div class="active" id="active"></div>
+        </div>
+        <section class="grid" id="grid"><p class="empty">불러오는 중…</p></section>
+        <div class="empty" id="empty" hidden>
+          <p>조건에 맞는 제품이 없어요.</p>
+          <button id="emptyReset" class="btn primary" type="button">필터 모두 지우기</button>
+        </div>
+
+        <details class="panel how">
+          <summary>가격 판단은 이렇게 해요</summary>
+          <ul>
+            <li>가격은 <b>배송비를 포함한 시장 최저가</b>를 기저귀·물티슈는 1매, 분유는 100g당 같은 <b>단가</b>로 환산해 기록해요. 팩 구성이 달라도 단가로 비교할 수 있어요.</li>
+            <li>기록한 단가를 최근 6개월 평균과 비교해요. 평균보다 5% 이상 낮으면 <span class="badge cheap">저렴</span>, 5% 이상 높으면 <span class="badge pricey">비쌈</span>, 그 사이는 <span class="badge normal">보통</span>이에요.</li>
+            <li>기록이 <b>4회 미만이거나 3주 미만</b>이면 정확한 비교가 어려워 <span class="badge pending">기록 중</span>으로 표시해요.</li>
+            <li>실시간 가격과 쇼핑몰별 비교는 <b>네이버 가격 비교 보기</b> 링크로 확인하세요.</li>
+          </ul>
+        </details>
       </div>
-      <div class="group"><b>브랜드</b><div class="chips" id="fBrand"></div></div>
-      <div class="group"><b>브랜드 가격대</b><div class="chips" id="fTier"></div></div>
-      <div class="group"><b>종류</b><div class="chips" id="fType"></div></div>
-      <div class="group"><b>단계</b><div class="chips" id="fStage"></div></div>
-      <div class="group"><b>가격 판단</b><div class="chips" id="fJudge"></div></div>
-      <button id="reset" class="link" type="button">필터 초기화</button>
-    </section>
-    </aside>
-    <div class="content">
-    <section id="brandInfo" class="panel"></section>
-
-    <div class="count" id="count"></div>
-    <section class="grid" id="grid"></section>
-    <p class="empty" id="empty" hidden>조건에 맞는 제품이 없어요. 필터를 조금 줄여보세요.</p>
     </div>
-    </div>
-
-    <section class="panel how">
-      <h2>가격 판단은 이렇게 해요</h2>
-      <ul>
-        <li>가격은 <b>배송비를 포함한 시장 최저가</b>를 기저귀·물티슈는 1매, 분유는 100g당 같은 <b>단가</b>로 환산해 기록해요. 팩 구성이 달라도 단가로 비교할 수 있어요.</li>
-        <li>기록한 단가를 최근 6개월 평균과 비교해요. 평균보다 5% 이상 낮으면 <span class="badge cheap">저렴</span>, 5% 이상 높으면 <span class="badge pricey">비쌈</span>, 그 사이는 <span class="badge normal">보통</span>이에요.</li>
-        <li>기록이 <b>4회 미만이거나 3주 미만</b>이면 정확한 비교가 어려워 <span class="badge pending">판단 보류</span>로 표시해요.</li>
-        <li>실시간 가격과 쇼핑몰별 비교는 상세 화면의 <b>네이버 가격 비교 보기</b> 버튼으로 확인하세요.</li>
-      </ul>
-    </section>
   </main>
 
   <footer class="foot">
@@ -72,6 +97,8 @@
       <p>가격은 수집 시점에 따라 실제와 다를 수 있으니 구매 전 해당 쇼핑몰에서 꼭 확인하세요. 브랜드 설명은 참고용 요약입니다.</p>
     </div>
   </footer>
+
+  <button id="toTop" class="fab" type="button" aria-label="맨 위로" hidden>↑</button>
 
   <div class="modal" id="modal" hidden>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle">
