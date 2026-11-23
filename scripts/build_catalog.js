@@ -178,7 +178,7 @@ const weightGuide = {
 };
 
 // 사이트 설정: requestUrl에 구글폼 등 요청·문의 폼 주소(https)를 넣으면 사이트에 요청 링크가 나타납니다. 비어 있으면 숨김.
-const SITE = { requestUrl: '' };
+const SITE = { requestUrl: 'https://docs.google.com/forms/d/e/1FAIpQLScT72Vj0wiB9EoNTeXDLYDiHyTHOZSI8apM4aVmS5r4zYrEsQ/viewform' };
 
 const out = { sample: false, generatedAt: new Date().toISOString().slice(0, 10), site: SITE, brands, weightGuide, products };
 fs.writeFileSync(dataFile, JSON.stringify(out));

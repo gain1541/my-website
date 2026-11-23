@@ -156,6 +156,66 @@
     </div>
   </div>
 
+<div class="inq-modal" id="inqModal" hidden>
+    <div class="inq-backdrop" data-inq-close></div>
+    <div class="inq-card" role="dialog" aria-modal="true" aria-labelledby="inqTitle">
+      <div class="inq-grab" aria-hidden="true"></div>
+      <button class="inq-close" type="button" aria-label="닫기" data-inq-close>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+
+      <form id="inqForm" novalidate action="https://docs.google.com/forms/d/e/1FAIpQLScT72Vj0wiB9EoNTeXDLYDiHyTHOZSI8apM4aVmS5r4zYrEsQ/formResponse" method="POST" target="inqSink">
+        <h2 id="inqTitle">요청 · 문의</h2>
+        <p class="inq-lead">1분이면 작성할 수 있어요 · 필수 항목만 채워 주세요</p>
+
+        <fieldset class="inq-field">
+          <legend>어떤 내용인가요? <b class="inq-req">*</b></legend>
+          <div class="inq-chips" role="radiogroup" aria-label="문의 유형">
+            <label class="inq-chip"><input type="radio" name="entry.431515580" value="제품 추가 요청" required><span>제품 추가 요청</span></label>
+            <label class="inq-chip"><input type="radio" name="entry.431515580" value="가격·정보 오류 제보"><span>가격·정보 오류 제보</span></label>
+            <label class="inq-chip"><input type="radio" name="entry.431515580" value="기타 문의"><span>기타 문의</span></label>
+          </div>
+        </fieldset>
+
+        <div class="inq-field">
+          <label for="inqProduct">제품명 또는 브랜드 <span class="inq-hint">선택</span></label>
+          <input id="inqProduct" type="text" name="entry.1527196073" placeholder="예: 하기스 네이처메이드 4단계" autocomplete="off">
+        </div>
+
+        <div class="inq-field">
+          <label for="inqDetail">자세한 내용 <b class="inq-req">*</b> <span class="inq-hint">참고 링크·용량·단계를 함께 적어 주세요</span></label>
+          <textarea id="inqDetail" name="entry.1979785717" required placeholder="예: 5단계 66매 구성도 같이 비교해 주세요."></textarea>
+        </div>
+
+        <div class="inq-field">
+          <label for="inqEmail">답변 받을 이메일 <span class="inq-hint">선택 · 답변이 필요할 때만</span></label>
+          <input id="inqEmail" type="email" name="entry.225605618" placeholder="you@example.com" autocomplete="email" inputmode="email">
+        </div>
+
+        <div class="inq-hp" aria-hidden="true"><input type="text" name="inq_hp" tabindex="-1" autocomplete="off"></div>
+        <input type="hidden" name="fvv" value="1">
+        <input type="hidden" name="pageHistory" value="0">
+
+        <p class="inq-err" id="inqErr" role="alert" hidden></p>
+        <p class="inq-note">내용은 Google 설문(Google Forms)으로 전달돼요. 이메일은 선택 항목이며 답변 목적으로만 쓰고, 답변 후 삭제해요.</p>
+        <button class="inq-submit" type="submit">보내기</button>
+        <p class="inq-alt"><a href="https://docs.google.com/forms/d/e/1FAIpQLScT72Vj0wiB9EoNTeXDLYDiHyTHOZSI8apM4aVmS5r4zYrEsQ/viewform" target="_blank" rel="noopener noreferrer">전송이 안 되면 구글폼으로 직접 열기 ↗</a></p>
+      </form>
+
+      <div class="inq-done" id="inqDone" hidden>
+        <div class="inq-done-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.5 12.5l5.2 5L19.5 6.8"/></svg></div>
+        <h2>잘 보냈어요!</h2>
+        <p>확인 후 반영할게요.<br>이메일을 남기셨다면 필요할 때 연락드려요.</p>
+        <div class="inq-done-actions">
+          <button class="inq-btn inq-btn-primary" type="button" data-inq-close>닫기</button>
+          <button class="inq-btn inq-btn-ghost" type="button" data-inq-again>하나 더 보내기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <iframe name="inqSink" id="inqSink" title="제출 결과" hidden></iframe>
+
   <script src="js/app.js"></script>
+  <script src="js/inquiry.js" defer></script>
 </body>
 </html>

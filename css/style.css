@@ -261,3 +261,44 @@ td.r,th.r{text-align:right}
 [hidden]{display:none!important}
 .req-inline{color:#2a5bc0;font-weight:700}
 .foot .req-link{color:var(--ink);font-weight:700}
+
+/* ===== 요청·문의 모달 (모바일은 바텀시트) ===== */
+.inq-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-weight:700;text-decoration:none;cursor:pointer}
+.inq-btn-primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.inq-modal{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;justify-content:center}
+.inq-backdrop{position:absolute;inset:0;background:rgba(40,35,60,.5)}
+.inq-card{position:relative;background:#fff;width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 30px rgba(40,35,60,.18);animation:inqUp .22s ease-out}
+@keyframes inqUp{from{transform:translateY(18px);opacity:.6}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.inq-card{animation:none}}
+.inq-grab{width:40px;height:4px;border-radius:2px;background:#ded3cc;margin:0 auto 12px}
+.inq-close{position:absolute;right:14px;top:14px;width:36px;height:36px;border:0;border-radius:50%;background:var(--normal-bg,#ececf1);color:#6a6373;display:grid;place-items:center;cursor:pointer}
+.inq-close svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+.inq-card h2{margin:2px 44px 4px 0;font-size:1.15rem}
+.inq-lead{margin:0 0 14px;color:var(--muted);font-size:.85rem}
+.inq-field{margin:0 0 14px;padding:0;border:0}
+.inq-field legend,.inq-field>label{display:block;padding:0;font-size:.92rem;font-weight:700;margin-bottom:7px}
+.inq-hint{font-weight:400;font-size:.8em;color:var(--muted)}
+.inq-req{color:var(--accent)}
+.inq-chips{display:flex;flex-wrap:wrap;gap:8px}
+.inq-chip{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border:1px solid var(--line);border-radius:999px;background:#fff;font-size:.92rem;cursor:pointer}
+.inq-chip input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.inq-chip.on{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.inq-chip:focus-within{outline:3px solid #9dbdf5;outline-offset:2px}
+.inq-card input[type=text],.inq-card input[type=email],.inq-card textarea{width:100%;border:1px solid #e7dcd5;border-radius:12px;padding:12px;background:#fffdfb;font:inherit;font-size:16px;color:var(--ink)}
+.inq-card input[type=text],.inq-card input[type=email]{height:auto}
+.inq-card textarea{min-height:96px;resize:vertical;line-height:1.5}
+.inq-card input:focus,.inq-card textarea:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px rgba(232,100,59,.15)}
+.inq-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.inq-err{margin:0 0 10px;color:var(--pricey,#c23b37);font-size:.85rem;font-weight:700}
+.inq-note{margin:0 0 8px;color:var(--muted);font-size:.78rem;line-height:1.4}
+.inq-submit{width:100%;min-height:50px;border:0;border-radius:12px;background:var(--accent);color:#fff;font:inherit;font-size:1rem;font-weight:800;cursor:pointer}
+.inq-submit:disabled{opacity:.6;cursor:progress}
+.inq-alt{margin:10px 0 0;text-align:center;font-size:.82rem}
+.inq-alt a{color:#2a5bc0}
+.inq-done{text-align:center;padding:18px 4px 6px}
+.inq-done-ic{width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:var(--mint);display:grid;place-items:center}
+.inq-done-ic svg{width:28px;height:28px;fill:none;stroke:var(--cheap,#23805f);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.inq-done h2{margin:0 0 6px}
+.inq-done p{margin:0 0 16px;color:var(--muted);font-size:.9rem;line-height:1.5}
+.inq-done-actions{display:flex;gap:8px;justify-content:center}
+@media (min-width:900px){.inq-modal{align-items:center}.inq-card{border-radius:20px;padding:24px 26px 22px;animation:none}.inq-grab{display:none}}
