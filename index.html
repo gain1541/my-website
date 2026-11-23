@@ -90,6 +90,7 @@
         <section class="grid" id="grid"><p class="empty">불러오는 중…</p></section>
         <div class="empty" id="empty" hidden>
           <p>조건에 맞는 제품이 없어요.</p>
+          <a class="btn req-link req-only" target="_blank" rel="noopener noreferrer" href="#" hidden>찾는 제품 요청하기</a>
           <button id="emptyReset" class="btn primary" type="button">필터 모두 지우기</button>
         </div>
 
@@ -106,6 +107,10 @@
           <details>
             <summary>"브랜드 등급"과 "지금 가격"은 뭐가 달라요?</summary>
             <p><b>브랜드 등급</b>(프리미엄·일반·가성비)은 브랜드의 평소 가격 수준이라 잘 바뀌지 않아요. <b>지금 가격</b>(저렴·보통·비쌈)은 이 제품의 지금 단가가 <b>평소보다</b> 싼지를 보여줘서 날마다 달라질 수 있어요. 가성비 브랜드라도 지금은 비쌀 수 있고, 프리미엄 브랜드가 세일 중일 수도 있어요.</p>
+          </details>
+          <details class="req-only" hidden>
+            <summary>찾는 제품이 없거나 정보가 틀려요</summary>
+            <p>제품 추가 요청, 가격·정보 오류 제보, 문의를 받고 있어요. <a class="req-link" target="_blank" rel="noopener noreferrer" href="#">요청·제보하기 ↗</a><br>연락처는 답변이 꼭 필요할 때만 적어 주세요.</p>
           </details>
           <details>
             <summary>"기록 중"은 무슨 뜻이에요?</summary>
@@ -126,6 +131,7 @@
 
   <footer class="foot">
     <div class="wrap">
+      <p class="req-only" hidden><a class="req-link" target="_blank" rel="noopener noreferrer" href="#">제품 추가 요청 · 오류 제보 · 문의 ↗</a></p>
       <p id="affNote" hidden></p>
       <p>가격은 실시간이 아니며 수집 시점에 따라 실제와 다를 수 있어요. 구매 전 해당 쇼핑몰에서 꼭 확인하세요. 브랜드·월령 설명은 참고용 요약입니다.</p>
     </div>

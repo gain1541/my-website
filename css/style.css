@@ -257,3 +257,7 @@ td.r,th.r{text-align:right}
 .tier.low{color:#2f6f8f;background:transparent}
 .ghint{margin:0 0 6px;font-size:.78rem;color:var(--muted);line-height:1.35}
 .group.sep{margin-top:18px;padding-top:14px;border-top:1px dashed #d9cbc3}
+
+[hidden]{display:none!important}
+.req-inline{color:#2a5bc0;font-weight:700}
+.foot .req-link{color:var(--ink);font-weight:700}

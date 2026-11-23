@@ -177,7 +177,10 @@ const weightGuide = {
   caution: '하기스·마미포코의 다른 라인과 팸퍼스, 보솜이는 체중 기준을 확인하지 못했어요. 포장 뒷면의 사이즈표를 꼭 확인하세요. 구간이 겹치면 체형에 따라 한 단계 위나 아래를 고르기도 해요.',
 };
 
-const out = { sample: false, generatedAt: new Date().toISOString().slice(0, 10), brands, weightGuide, products };
+// 사이트 설정: requestUrl에 구글폼 등 요청·문의 폼 주소(https)를 넣으면 사이트에 요청 링크가 나타납니다. 비어 있으면 숨김.
+const SITE = { requestUrl: '' };
+
+const out = { sample: false, generatedAt: new Date().toISOString().slice(0, 10), site: SITE, brands, weightGuide, products };
 fs.writeFileSync(dataFile, JSON.stringify(out));
 
 const unitName = (p) => `${p.basis === 1 ? '' : p.basis}${p.unit}당`;

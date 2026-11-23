@@ -47,6 +47,7 @@
 
   const state = { cat: 'diaper', tier: new Set(), brand: new Set(), type: new Set(), stage: new Set(), judge: new Set(), q: '', sort: 'diff' };
   let DB = null;
+  let reqUrl = '';
   let favs = new Set();
   let favOnly = false;
   let prevBrandCount = 0;
@@ -77,6 +78,13 @@
 
   function init() {
     DB.products.forEach((p) => { p.a = analyze(p); });
+    // 요청·문의 폼 링크(주소가 있을 때만 표시)
+    const ru = DB.site && DB.site.requestUrl;
+    if (ru && /^https:\/\//.test(ru)) {
+      reqUrl = ru;
+      document.querySelectorAll('.req-link').forEach((a) => { a.href = ru; });
+      document.querySelectorAll('.req-only').forEach((e) => { e.hidden = false; });
+    }
     try { favs = new Set(JSON.parse(store.get('favs') || '[]')); } catch (e) { favs = new Set(); }
     const dates = DB.products.flatMap((p) => (p.history || []).map((x) => x.d)).sort();
     if (dates.length) { const el = $('#asof'); el.textContent = `가격 기준일 ${dates[dates.length - 1].slice(5).replace('-', '/')}`; el.hidden = false; }
@@ -414,12 +422,13 @@
     const b = DB.brands[p.brand];
     const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${p.age ? `<span class="age">대상: ${esc(p.age)}</span>` : ''}</div></div>${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
     const btns = `<div class="btns"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a>${p.links && p.links.coupang ? (p.coupangNote ? '<p class="aff warn">' + esc(p.coupangNote) + '</p>' : '') + '<p class="aff">' + esc(AFF_TEXT) + '</p>' : ''}</div>`;
+    const reqLine = reqUrl ? `<p class="basis"><a class="req-inline" target="_blank" rel="noopener noreferrer" href="${esc(reqUrl)}">가격·정보가 달라요? 제보하기 ↗</a></p>` : '';
     const brandBox = b ? `<div class="binfo"><b>${esc(p.brand)}</b> ${tierTag(b.tier)} · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
 
     if (a.none) {
       $('#mBody').innerHTML = `${head}
         <div class="verdict pending">아직 가격이 등록되지 않았어요. 아래 버튼으로 현재 가격을 직접 확인해 보세요.</div>
-        ${brandBox}${btns}`;
+        ${brandBox}${reqLine}${btns}`;
     } else {
       const verdictText = {
         pending: `가격 기록이 ${a.count}회예요. ${MIN_POINTS}회 이상, 3주 이상 쌓이면 평균과 비교해 싼지 비싼지 알려드려요.`,
@@ -440,7 +449,7 @@
         <p class="basis">배송비를 포함한 시장 최저가를 ${unitLabel(p)} 가격으로 환산한 값이에요. 기준일 ${esc(a.date)}${a.seller ? ` · ${esc(a.seller)}` : ''}</p>
         <table><thead><tr><th>기준일</th><th class="r">${unitLabel(p)} 가격</th><th class="r">판매처</th></tr></thead><tbody>
           ${rows.map((r) => `<tr><td>${esc(r.d)}</td><td class="r">${fmtU(r.u)}원</td><td class="r">${esc(r.s || '-')}</td></tr>`).join('')}
-        </tbody></table>${brandBox}${btns}`;
+        </tbody></table>${brandBox}${reqLine}${btns}`;
     }
     $('#modal').hidden = false;
     $('.sheet').scrollTop = 0;
