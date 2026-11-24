@@ -83,6 +83,14 @@
       const rb = document.getElementById('retry'); if (rb) rb.addEventListener('click', () => location.reload());
     });
 
+  // 제품명에 월령이 이미 들어 있으면 같은 월령 태그를 또 보여주지 않음
+  const ageTag = (p) => (p.age && !p.name.includes(p.age.replace(/\(판매처 표기\)/, '')) ? p.age : '');
+  // 판단 시작 예정일: 첫 기록일 + 최소 기간(주 1회 갱신 가정). 이미 지났으면 null
+  function readyOn(a) {
+    const d = new Date(Date.parse(a.h[0].d) + MIN_SPAN * DAY);
+    if (d.getTime() <= Date.now()) return null;
+    return `${d.getMonth() + 1}/${d.getDate()}`;
+  }
   function analyze(p) {
     const h = (p.history || []).slice().sort((a, b) => a.d.localeCompare(b.d));
     if (!h.length) return { none: true, judge: 'pending', h };
@@ -383,7 +391,7 @@
       const items = DB.products.filter((p) => p.cat === sec.cat && overlap(p, band));
       const rows = sec.noList ? '' : (items.length
         ? `<div class="axis"><span></span><div><span>0</span><span>6</span><span>12</span><span>18</span><span>24개월</span></div></div>` + items.map((p) =>
-          `<button class="gitem" data-id="${p.id}"><span class="gname"><small>${esc(p.brand)}</small>${esc(p.name)}${p.age ? ` <em class="age">${esc(p.age)}</em>` : ''}</span>${bar(p)}</button>`).join('')
+          `<button class="gitem" data-id="${p.id}"><span class="gname"><small>${esc(p.brand)}</small>${esc(p.name)}${ageTag(p) ? ` <em class="age">${esc(ageTag(p))}</em>` : ''}</span>${bar(p)}</button>`).join('')
         : (sec.cat === 'diaper' ? '' : `<p class="gempty">이 월령에 맞는 ${sec.title} 정보는 확인 중이에요.</p>`));
       const unk = (sec.noList || sec.cat === 'diaper') ? [] : DB.products.filter((p) => p.cat === sec.cat && !p.months);
       const unkHtml = unk.length ? `<details class="unk"><summary>월령 확인 중인 제품 ${unk.length}개</summary><p class="wnote">판매 페이지에서 월령이 확인되지 않아 위 목록에 없어요. 목록에 없다고 맞지 않는 제품은 아니에요. 눌러서 상세를 보고 포장 표기를 확인하세요.</p>` +
@@ -482,7 +490,7 @@
       const link = `<a class="mini" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 보기 ↗</a>`;
       const isFav = favs.has(p.id);
       const heart = `<button type="button" class="heart ${isFav ? 'on' : ''}" data-fav="${p.id}" aria-pressed="${isFav}" aria-label="${esc(p.name)} 관심 ${isFav ? '해제' : '추가'}">${isFav ? '♥' : '♡'}</button>`;
-      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3 class="c-name"><button type="button" class="card-open" aria-label="${esc(p.name)} 상세 보기">${esc(p.name)}</button></h3>${p.age ? `<span class="age">${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>`;
+      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3 class="c-name"><button type="button" class="card-open" aria-label="${esc(p.name)} 상세 보기">${esc(p.name)}</button></h3>${ageTag(p) ? `<span class="age">${esc(ageTag(p))}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>`;
       if (a.none) {
         return `<article class="card nodata" data-id="${p.id}">${top('<span class="badge pending">대기</span>')}
           <div class="c-mid"><span class="price none">가격 수집 전</span></div>
@@ -491,7 +499,7 @@
       const pr = peersOf(p);
       const rankHtml = pr ? `<div class="rank">${p.stage ? esc(p.stage) + ' ' : ''}${pr.length}개 중 <b>${pr.indexOf(p) + 1}위</b> (단가 싼 순)</div>` : '';
       const note = a.judge === 'pending'
-        ? `<span class="diff pending">기록 ${a.count}회 · ${MIN_POINTS}회부터 판단</span>`
+        ? `<span class="diff pending">기록 ${a.count}회 · ${readyOn(a) ? `${readyOn(a)}경 판단 시작` : `${MIN_POINTS}회부터 판단`}</span>`
         : `<span class="diff ${a.judge}">평균 대비 ${pct(a.diff)}</span>${a.nearMin ? ' <span class="low">최저가 근접</span>' : ''}`;
       return `<article class="card" data-id="${p.id}">${top(`<span class="badge ${a.judge}">${JL[a.judge]}</span>`)}
         <div class="c-mid"><span class="price"><small>${unitLabel(p)}</small>${fmtU(a.cur)}원</span>${a.count > 1 ? spark(a.h) : ''}</div>
@@ -553,7 +561,7 @@
     const p = DB.products.find((x) => x.id === id);
     const a = p.a;
     const b = DB.brands[p.brand];
-    const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${p.age ? `<span class="age">대상: ${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>${p.note ? `<p class="basis note-line">ℹ️ ${esc(p.note)}</p>` : ''}${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
+    const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${ageTag(p) ? `<span class="age">대상: ${esc(ageTag(p))}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>${p.note ? `<p class="basis note-line">ℹ️ ${esc(p.note)}</p>` : ''}${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
     const shareBtn = `<button type="button" class="btn share" data-share="${esc(p.id)}">🔗 이 제품 링크 공유</button>`;
     const btns = `<div class="btns">${shareBtn}<a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a>${p.links && p.links.coupang ? (p.coupangNote ? '<p class="aff warn">' + esc(p.coupangNote) + '</p>' : '') + '<p class="aff">' + esc(AFF_TEXT) + '</p>' : ''}</div>`;
     const reqLine = reqUrl ? `<p class="basis"><a class="req-inline" target="_blank" rel="noopener noreferrer" href="${esc(reqUrl)}">가격·정보가 달라요? 제보하기 ↗</a></p>` : '';
@@ -565,7 +573,7 @@
         ${brandBox}${reqLine}${btns}`;
     } else {
       const verdictText = {
-        pending: `가격 기록이 ${a.count}회예요. ${MIN_POINTS}회 이상, 3주 이상 쌓이면 평균과 비교해 싼지 비싼지 알려드려요.`,
+        pending: `가격 기록이 ${a.count}회예요. ${MIN_POINTS}회 이상, 3주 이상 쌓이면 평균과 비교해 싼지 비싼지 알려드려요.${readyOn(a) ? ` 주 1회 갱신하면 ${readyOn(a)}경부터 판단이 시작돼요.` : ''}`,
         cheap: `지금 단가가 평균보다 ${Math.abs(a.diff * 100).toFixed(1)}% 저렴해요. 사기 좋은 타이밍이에요.`,
         normal: `지금 단가는 평균과 비슷한 수준이에요(${pct(a.diff)}). 급하지 않다면 추이를 더 지켜봐도 좋아요.`,
         pricey: `지금 단가가 평균보다 ${(a.diff * 100).toFixed(1)}% 비싸요. 급하지 않다면 조금 기다려 보세요.`,
