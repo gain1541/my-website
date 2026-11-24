@@ -402,3 +402,8 @@ body[data-cat] .stick{border-bottom-color:var(--cat-soft)}
 :focus-visible{outline:3px solid #2f62c4;outline-offset:2px}
 /* 노치·가로 모드 안전 영역 */
 body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+
+/* 폰 가로 모드(화면 높이가 낮을 때): 상단 바가 화면의 40%를 차지하므로 고정하지 않고 스크롤과 함께 올라가게 합니다 */
+@media (max-height:500px) and (orientation:landscape){
+  .stick{position:static;transform:none!important}
+}
