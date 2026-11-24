@@ -356,3 +356,8 @@ body[data-cat] .stick{border-bottom-color:var(--cat-soft)}
 .crossnote{margin:6px 0 10px;font-size:.88rem;color:var(--muted)}
 .crossnote .xcat{margin:2px 4px 2px 0;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;min-height:36px;font-weight:700;color:var(--ink)}
 #empty .chips{justify-content:center;margin:8px 0 12px}
+
+.asof.stale{color:#8a4b00;font-weight:700}
+.unk{margin-top:8px}
+.unk summary{padding:8px 0;font-weight:700;font-size:.9rem;color:var(--muted);cursor:pointer}
+.gitem.nobar{grid-template-columns:1fr}

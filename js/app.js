@@ -110,7 +110,17 @@
     }
     try { favs = new Set(JSON.parse(store.get('favs') || '[]')); } catch (e) { favs = new Set(); }
     const dates = DB.products.flatMap((p) => (p.history || []).map((x) => x.d)).sort();
-    if (dates.length) { const el = $('#asof'); el.textContent = `가격 기준일 ${dates[dates.length - 1].slice(5).replace('-', '/')}`; el.hidden = false; }
+    if (dates.length) {
+      const last = dates[dates.length - 1], el = $('#asof');
+      const t = new Date(); const today = Date.UTC(t.getFullYear(), t.getMonth(), t.getDate());
+      const [yy, mm, dd] = last.split('-').map(Number);
+      const days = Math.max(0, Math.round((today - Date.UTC(yy, mm - 1, dd)) / 864e5));
+      const label = days === 0 ? '오늘' : `${days}일 전`;
+      el.textContent = days > 14 ? `⚠ 가격 기준일 ${last.slice(5).replace('-', '/')} (${label}) · 지금과 다를 수 있어요`
+        : `가격 기준일 ${last.slice(5).replace('-', '/')} (${label})`;
+      el.classList.toggle('stale', days > 7);
+      el.hidden = false;
+    }
     const savedCat = store.get('cat');
     if (CATS.some((c) => c.id === savedCat)) state.cat = savedCat;
     const savedSort = store.get('sort');
@@ -353,7 +363,10 @@
         ? `<div class="axis"><span></span><div><span>0</span><span>6</span><span>12</span><span>18</span><span>24개월</span></div></div>` + items.map((p) =>
           `<button class="gitem" data-id="${p.id}"><span class="gname"><small>${esc(p.brand)}</small>${esc(p.name)}${p.age ? ` <em class="age">${esc(p.age)}</em>` : ''}</span>${bar(p)}</button>`).join('')
         : (sec.cat === 'diaper' ? '' : `<p class="gempty">이 월령에 맞는 ${sec.title} 정보는 확인 중이에요.</p>`));
-      return `<section class="gsec"><h3>${sec.title}</h3><p class="gtip">${sec.tip}</p>${sec.cat === 'diaper' ? weightHtml() : ''}${rows}</section>`;
+      const unk = (sec.noList || sec.cat === 'diaper') ? [] : DB.products.filter((p) => p.cat === sec.cat && !p.months);
+      const unkHtml = unk.length ? `<details class="unk"><summary>월령 확인 중인 제품 ${unk.length}개</summary><p class="wnote">판매 페이지에서 월령이 확인되지 않아 위 목록에 없어요. 목록에 없다고 맞지 않는 제품은 아니에요. 눌러서 상세를 보고 포장 표기를 확인하세요.</p>` +
+        unk.map((p) => `<button class="gitem nobar" data-id="${p.id}"><span class="gname"><small>${esc(p.brand)}</small>${esc(p.name)}${p.stage ? ` <em class="age">${esc(p.stage)}</em>` : ''}</span></button>`).join('') + '</details>' : '';
+      return `<section class="gsec"><h3>${sec.title}</h3><p class="gtip">${sec.tip}</p>${sec.cat === 'diaper' ? weightHtml() : ''}${rows}${unkHtml}</section>`;
     }).join('') + '<p class="basis">월령은 쇼핑몰 판매 페이지에 적힌 표기를 옮긴 참고용이에요. 예를 들어 0~6개월 제품은 6개월 전까지, 6~12개월 제품은 6개월부터예요. 아기마다 성장이 달라서 정확한 기준은 제품 포장에서 확인하세요. 월령이 확인된 제품만 표시돼요.</p>';
   }
   function openGuide() {
