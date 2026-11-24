@@ -139,7 +139,12 @@
     const nt = $('#noticeText');
     let msg = '';
     if (!withData.length) msg = '📝 제품 목록만 먼저 공개했어요. <b>가격은 수집이 시작되면 표시</b>돼요.';
-    else if (withData.every((p) => p.a.judge === 'pending')) msg = `📈 가격 기록을 쌓는 중이에요. <b>${MIN_POINTS}회 이상, 3주 이상</b> 쌓이면 싼지 비싼지 알려드려요.`;
+    else if (withData.every((p) => p.a.judge === 'pending')) {
+      // 가장 빠른 판단 시작 예정일(첫 기록일 + 최소 기간). 카드마다 반복하지 않고 여기서 한 번만 알려줍니다.
+      const soon = new Date(Math.min(...withData.map((p) => Date.parse(p.a.h[0].d))) + MIN_SPAN * DAY);
+      const when = soon.getTime() > Date.now() ? ` 가장 빠르면 <b>${soon.getMonth() + 1}/${soon.getDate()}경</b>부터예요.` : '';
+      msg = `📈 가격 기록을 쌓는 중이에요. <b>${MIN_POINTS}회 이상, 3주 이상</b> 쌓이면 싼지 비싼지 알려드려요.${when}`;
+    }
     if (msg && store.get('noticeClosed') !== msg) {
       nt.innerHTML = msg; $('#sampleNotice').hidden = false;
       $('#noticeClose').addEventListener('click', () => { $('#sampleNotice').hidden = true; store.set('noticeClosed', msg); });
@@ -219,7 +224,11 @@
     }, { passive: true });
     fab.addEventListener('click', () => window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
 
-    if (DB.products.some((p) => p.links && p.links.coupang)) { $('#affNote').textContent = AFF_TEXT; $('#affNote').hidden = false; }
+    if (DB.products.some((p) => p.links && p.links.coupang)) {
+      $('#affNote').textContent = AFF_TEXT; $('#affNote').hidden = false;
+      // 카드에 쿠팡 버튼이 있으므로 목록 위에도 같은 안내를 한 번만 표시
+      $('#affTop').textContent = AFF_TEXT; $('#affTop').hidden = false;
+    }
     render();
     // 공유 링크(?p=제품ID)로 들어오면 해당 카테고리로 가서 상세를 엽니다
     try {
@@ -326,6 +335,8 @@
       brands.map((b) => `<button class="chip ${state.brand.has(b) ? 'on' : ''}" data-v="${esc(b)}">${esc(b)}</button>`).join('');
     renderBrands(brands);
     if (state.brand.size !== prevBrandCount) { $('#brandInfo').open = state.brand.size > 0; prevBrandCount = state.brand.size; }
+    // 모바일: 브랜드를 고르지 않았을 땐 '브랜드 특징'을 목록 아래로 보내 첫 화면에 제품이 보이게(CSS order)
+    $('#brandInfo').classList.toggle('late', state.brand.size === 0);
     renderList();
   }
 
@@ -487,24 +498,28 @@
     cn.innerHTML = cross.length ? `다른 카테고리에서도 찾았어요: ${cross.map(([c, n]) => `<button type="button" class="xcat" data-cat="${c.id}">${esc(c.label)} ${n}개</button>`).join('')}` : '';
     $('#grid').innerHTML = list.map((p) => {
       const a = p.a;
-      const link = `<a class="mini" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 보기 ↗</a>`;
+      // 가격을 낸 판매처가 쿠팡이면 쿠팡 버튼을 앞에 둡니다(카드의 가격과 버튼이 같은 곳을 가리키게)
+      const naverBtn = `<a class="cta" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교 ↗</a>`;
+      const coupangBtn = `<a class="cta" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기 ↗</a>`;
+      const link = `<div class="c-cta">${!a.none && /^쿠팡/.test(a.seller || '') ? coupangBtn + naverBtn : naverBtn + coupangBtn}</div>`;
       const isFav = favs.has(p.id);
       const heart = `<button type="button" class="heart ${isFav ? 'on' : ''}" data-fav="${p.id}" aria-pressed="${isFav}" aria-label="${esc(p.name)} 관심 ${isFav ? '해제' : '추가'}">${isFav ? '♥' : '♡'}</button>`;
       const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3 class="c-name"><button type="button" class="card-open" aria-label="${esc(p.name)} 상세 보기">${esc(p.name)}</button></h3>${ageTag(p) ? `<span class="age">${esc(ageTag(p))}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>`;
       if (a.none) {
         return `<article class="card nodata" data-id="${p.id}">${top('<span class="badge pending">대기</span>')}
           <div class="c-mid"><span class="price none">가격 수집 전</span></div>
-          <div class="c-bot"><span class="unit">현재 가격은 링크에서 확인하세요</span>${link}</div></article>`;
+          <div class="unit">현재 가격은 링크에서 확인하세요</div>${link}</article>`;
       }
       const pr = peersOf(p);
       const rankHtml = pr ? `<div class="rank">${p.stage ? esc(p.stage) + ' ' : ''}${pr.length}개 중 <b>${pr.indexOf(p) + 1}위</b> (단가 싼 순)</div>` : '';
+      // 기록 중인 카드는 같은 문구를 반복하지 않음(배지 '기록 중' + 상단 안내 + 상세에 판단 시작 예정일이 있음)
       const note = a.judge === 'pending'
-        ? `<span class="diff pending">기록 ${a.count}회 · ${readyOn(a) ? `${readyOn(a)}경 판단 시작` : `${MIN_POINTS}회부터 판단`}</span>`
+        ? ''
         : `<span class="diff ${a.judge}">평균 대비 ${pct(a.diff)}</span>${a.nearMin ? ' <span class="low">최저가 근접</span>' : ''}`;
       return `<article class="card" data-id="${p.id}">${top(`<span class="badge ${a.judge}">${JL[a.judge]}</span>`)}
         <div class="c-mid"><span class="price"><small>${unitLabel(p)}</small>${fmtU(a.cur)}원</span>${a.count > 1 ? spark(a.h) : ''}</div>
         <div class="unit">${p.qty.toLocaleString('ko-KR')}${p.unit} 약 ${won(packPrice(p, a.cur))}${a.seller ? ` · ${esc(a.seller)}` : ''} · ${a.date.slice(5).replace('-', '/')} 기준</div>${rankHtml}
-        <div class="c-bot"><span>${note}</span>${link}</div>
+        ${note ? `<div class="c-note">${note}</div>` : ''}${link}
       </article>`;
     }).join('');
   }

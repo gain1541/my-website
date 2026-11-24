@@ -407,3 +407,18 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
 @media (max-height:500px) and (orientation:landscape){
   .stick{position:static;transform:none!important}
 }
+
+/* 카드 하단: 판매처에 맞춘 버튼 2개(가격을 낸 곳이 앞), 기록 중 문구 반복 제거 */
+.c-note{margin-top:2px}
+.c-cta{display:flex;gap:8px;margin-top:4px}
+.cta{flex:1 1 0;display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 8px;border-radius:10px;border:1px solid #9dbdf5;background:#fff;color:#2a5bc0;font-size:.85rem;font-weight:700;text-decoration:none;white-space:nowrap}
+.cta:first-child{background:var(--accent,#c94a24);border-color:var(--accent,#c94a24);color:#fff}
+.affline{font-size:.78rem;color:var(--muted);margin:2px 0 8px}
+#favToggle{white-space:nowrap}
+
+/* 모바일: 브랜드를 고르지 않았으면 '브랜드 특징'을 목록 아래(FAQ 위)로 */
+@media (max-width:899px){
+  .content{display:flex;flex-direction:column}
+  .content>.brandbox.late{order:1}
+  .content>.faq{order:2}
+}
