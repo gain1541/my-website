@@ -32,12 +32,12 @@
     </div>
   </header>
 
-  <div id="sampleNotice" class="notice" hidden>
+  <div id="sampleNotice" class="notice" role="region" aria-label="안내" hidden>
     <span id="noticeText"></span>
     <button id="noticeClose" type="button" aria-label="안내 닫기">✕</button>
   </div>
 
-  <div class="stick" id="stick">
+  <div class="stick" id="stick" role="region" aria-label="카테고리와 검색">
     <div class="wrap">
       <nav class="tabs" id="tabs" aria-label="카테고리"></nav>
       <div class="bar">
@@ -86,6 +86,7 @@
           <div class="brands" id="brands"></div>
         </details>
 
+        <div class="crossnote" id="crossNote" role="status" hidden></div>
         <div class="listhead">
           <div class="count" id="count" role="status" aria-live="polite"></div>
           <div class="lh-right">
@@ -94,9 +95,12 @@
           </div>
         </div>
         <div class="active" id="active"></div>
+        <h2 class="sr">제품 목록</h2>
         <section class="grid" id="grid"><p class="empty">불러오는 중…</p></section>
         <div class="empty" id="empty" hidden>
-          <p>조건에 맞는 제품이 없어요.</p>
+          <p id="emptyMsg">조건에 맞는 제품이 없어요.</p>
+          <p class="ghint">이렇게 찾아보세요: 카테고리를 눌러 전체 제품을 볼 수 있어요.</p>
+          <div class="chips" id="emptySuggest"></div>
           <a class="btn req-link req-only" target="_blank" rel="noopener noreferrer" href="#" hidden>찾는 제품 요청하기</a>
           <button id="emptyReset" class="btn primary" type="button">필터 모두 지우기</button>
         </div>

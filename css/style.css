@@ -3,7 +3,7 @@
   --peach:#ffe3d6; --mint:#d6f2e8; --sky:#dbe9ff; --lav:#e8e0ff;
   --cheap:#23805f; --cheap-bg:#d6f2e8; --pricey:#c23b37; --pricey-bg:#ffdcdc; --normal:#555a66; --normal-bg:#ececf1;
   --pend:#8a5a00; --pend-bg:#fff0c9;
-  --accent:#e8643b; --radius:16px;
+  --accent:#c94a24; --radius:16px;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -348,3 +348,11 @@ body[data-cat] .chip.on,body[data-cat] .achip:not(.fav){background:var(--cat-sof
 body[data-cat] .count{border-left:4px solid var(--cat);padding-left:8px}
 body[data-cat] .brandbox{border-left:4px solid var(--cat)}
 body[data-cat] .stick{border-bottom-color:var(--cat-soft)}
+
+/* 접근성: 카드 제목 버튼, 검색 안내 */
+.card-open{all:unset;cursor:pointer;display:block;font:inherit;color:inherit;line-height:1.35}
+.card-open:focus-visible{outline:3px solid #9dbdf5;outline-offset:3px;border-radius:6px}
+.c-name{margin:0;font-size:1rem}
+.crossnote{margin:6px 0 10px;font-size:.88rem;color:var(--muted)}
+.crossnote .xcat{margin:2px 4px 2px 0;border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;min-height:36px;font-weight:700;color:var(--ink)}
+#empty .chips{justify-content:center;margin:8px 0 12px}

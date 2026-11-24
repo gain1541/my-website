@@ -46,6 +46,28 @@
   const naverUrl = (p) => (p.links && p.links.naver) || NAVER + encodeURIComponent(p.name);
   const coupangUrl = (p) => (p.links && p.links.coupang) || COUPANG + encodeURIComponent(p.name);
 
+  // 검색 별칭: 부모가 실제로 치는 말(기저귀·공갈·분유…)로도 찾히게 합니다.
+  const CAT_ALIAS = {
+    diaper: '기저귀 팬티 밴드 신생아',
+    formula: '분유 우유 밀크',
+    pacifier: '쪽쪽이 공갈 공갈젖꼭지 노리개 노리개젖꼭지',
+    bottle: '젖병 분유병 수유',
+    nipple: '젖꼭지 젖병젖꼭지 니플 수유',
+    etc: '',
+  };
+  const TYPE_ALIAS = { '물티슈': '물티슈 와이프 티슈', '로션·크림': '로션 크림 보습 스킨케어', '젖병 소독기': '소독기 살균 자외선 uv 건조 소독' };
+  const blobOf = (p) => {
+    if (!p._s) {
+      p._s = [p.name, p.brand, p.type, p.stage, p.age, p.fits, p.includes, CAT_ALIAS[p.cat], TYPE_ALIAS[p.type]].filter(Boolean).join(' ').toLowerCase();
+      p._sn = p._s.replace(/\s+/g, '');
+    }
+    return p._s;
+  };
+  const matches = (p, q) => {
+    blobOf(p);
+    return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => p._s.includes(w) || p._sn.includes(w));
+  };
+
   const state = { cat: 'diaper', tier: new Set(), brand: new Set(), type: new Set(), stage: new Set(), judge: new Set(), q: '', sort: 'diff' };
   let DB = null;
   let reqUrl = '';
@@ -113,6 +135,9 @@
       render();
       window.scrollTo({ top: 0 });
     });
+    $('#crossNote').addEventListener('click', (e) => { const b = e.target.closest('.xcat'); if (b) switchCat(b.dataset.cat, true); });
+    $('#emptySuggest').innerHTML = CATS.map((c) => `<button type="button" class="chip" data-cat="${c.id}">${esc(c.label)}</button>`).join('');
+    $('#emptySuggest').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (b) { state.q = ''; $('#q').value = ''; switchCat(b.dataset.cat, false); } });
     $('#q').addEventListener('input', (e) => { state.q = e.target.value.trim(); renderList(); });
     $('#sort').addEventListener('change', (e) => { state.sort = e.target.value; store.set('sort', state.sort); renderList(); });
     ['#reset', '#resetM', '#emptyReset'].forEach((id) => $(id).addEventListener('click', () => { clearFilters(true); render(); }));
@@ -145,9 +170,6 @@
       if (!e.target.closest('a')) open(e.target.closest('.card'));
     });
     $('#favToggle').addEventListener('click', () => { favOnly = !favOnly; renderList(); });
-    $('#grid').addEventListener('keydown', (e) => {
-      if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('card')) { e.preventDefault(); open(e.target); }
-    });
     $('#mClose').addEventListener('click', closeLayer);
     $('#openGuide').addEventListener('click', openGuide);
     $('#gClose').addEventListener('click', closeLayer);
@@ -185,6 +207,13 @@
     store.set('favs', JSON.stringify([...favs]));
     renderList();
   }
+  function switchCat(cat, keepQuery) {
+    state.cat = cat; store.set('cat', cat);
+    clearFilters(false);
+    if (!keepQuery) { state.q = ''; $('#q').value = ''; }
+    render();
+    window.scrollTo({ top: 0 });
+  }
   function toggle(key, v) {
     const set = state[key];
     set.has(v) ? set.delete(v) : set.add(v);
@@ -197,7 +226,23 @@
 
   // 시트/상세 열기·닫기 (모바일 뒤로가기 버튼으로 닫히도록 history 사용)
   function pushLayer(k) { try { history.pushState({ layer: k }, ''); } catch (e) { /* 무시 */ } }
+  // 레이어(상세·가이드·필터)가 열리면 배경을 비활성(inert)하고 포커스를 안으로 옮기며, 닫으면 처음 눌렀던 곳으로 돌려놓습니다.
+  const BG_SEL = 'header.top, #sampleNotice, #stick, main, footer, #toTop';
+  let lastOpener = null;
+  function layerOpened(container, focusSel) {
+    if (!lastOpener) lastOpener = document.activeElement;
+    // 열린 레이어를 품은 영역(예: main 안의 필터 시트)은 inert 대상에서 뺍니다.
+    const block = (e) => {
+      if (!e.contains(container)) { e.setAttribute('inert', ''); return; }
+      if (e !== container) Array.from(e.children).forEach(block);
+    };
+    document.querySelectorAll(BG_SEL).forEach(block);
+    setTimeout(() => { const f = container.querySelector(focusSel); if (f) f.focus({ preventScroll: true }); }, 30);
+  }
   function hideAll() {
+    document.querySelectorAll('[inert]').forEach((e) => e.removeAttribute('inert'));
+    if (lastOpener && lastOpener.isConnected && lastOpener.focus) lastOpener.focus({ preventScroll: true });
+    lastOpener = null;
     $('#modal').hidden = true;
     $('#guide').hidden = true;
     $('#side').classList.remove('open');
@@ -210,6 +255,7 @@
     $('#side').classList.add('open');
     document.body.style.overflow = 'hidden';
     pushLayer('sheet');
+    layerOpened($('#side'), '#sheetClose');
   }
 
   const inCat = () => DB.products.filter((p) => p.cat === state.cat);
@@ -316,6 +362,7 @@
     document.body.style.overflow = 'hidden';
     $('#guide .sheet').scrollTop = 0;
     pushLayer('guide');
+    layerOpened($('#guide'), '#gClose');
   }
 
   // 사진이 없을 때 쓰는 카테고리별 일러스트(직접 그린 아이콘)
@@ -354,7 +401,7 @@
       if (state.stage.size && !(state.cat === 'pacifier' ? [...state.stage].some((l) => overlap(p, BANDS.find((x) => x.label === l))) : state.stage.has(p.stage))) return false;
       if (state.judge.size && !state.judge.has(p.a.judge)) return false;
       if (favOnly && !favs.has(p.id)) return false;
-      if (state.q && !(p.name + p.brand).toLowerCase().includes(state.q.toLowerCase())) return false;
+      if (state.q && !matches(p, state.q)) return false;
       return true;
     });
     // 가격 정보가 없는 제품은 항상 뒤로
@@ -371,21 +418,27 @@
     fb.textContent = `${favOnly ? '♥' : '♡'} 관심만${favs.size ? ` (${favs.size})` : ''}`;
     $('#applyM').textContent = list.length ? `${list.length}개 제품 보기` : '조건에 맞는 제품 없음';
     $('#empty').hidden = list.length > 0;
+    $('#emptyMsg').textContent = state.q ? `'${state.q}' 검색 결과가 없어요.` : '조건에 맞는 제품이 없어요.';
+    // 다른 카테고리에서도 찾았다면 알려줍니다(검색은 현재 탭만 보여주므로 오해를 막기 위해)
+    const cross = state.q ? CATS.filter((c) => c.id !== state.cat).map((c) => [c, DB.products.filter((p) => p.cat === c.id && matches(p, state.q)).length]).filter(([, n]) => n > 0) : [];
+    const cn = $('#crossNote');
+    cn.hidden = cross.length === 0;
+    cn.innerHTML = cross.length ? `다른 카테고리에서도 찾았어요: ${cross.map(([c, n]) => `<button type="button" class="xcat" data-cat="${c.id}">${esc(c.label)} ${n}개</button>`).join('')}` : '';
     $('#grid').innerHTML = list.map((p) => {
       const a = p.a;
       const link = `<a class="mini" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 보기 ↗</a>`;
       const isFav = favs.has(p.id);
       const heart = `<button type="button" class="heart ${isFav ? 'on' : ''}" data-fav="${p.id}" aria-pressed="${isFav}" aria-label="${esc(p.name)} 관심 ${isFav ? '해제' : '추가'}">${isFav ? '♥' : '♡'}</button>`;
-      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3>${esc(p.name)}</h3>${p.age ? `<span class="age">${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>`;
+      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3 class="c-name"><button type="button" class="card-open" aria-label="${esc(p.name)} 상세 보기">${esc(p.name)}</button></h3>${p.age ? `<span class="age">${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>`;
       if (a.none) {
-        return `<article class="card nodata" data-id="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} 상세 보기">${top('<span class="badge pending">대기</span>')}
+        return `<article class="card nodata" data-id="${p.id}">${top('<span class="badge pending">대기</span>')}
           <div class="c-mid"><span class="price none">가격 수집 전</span></div>
           <div class="c-bot"><span class="unit">현재 가격은 링크에서 확인하세요</span>${link}</div></article>`;
       }
       const note = a.judge === 'pending'
         ? `<span class="diff pending">기록 ${a.count}회 · ${MIN_POINTS}회부터 판단</span>`
         : `<span class="diff ${a.judge}">평균 대비 ${pct(a.diff)}</span>${a.nearMin ? ' <span class="low">최저가 근접</span>' : ''}`;
-      return `<article class="card" data-id="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} 상세 보기">${top(`<span class="badge ${a.judge}">${JL[a.judge]}</span>`)}
+      return `<article class="card" data-id="${p.id}">${top(`<span class="badge ${a.judge}">${JL[a.judge]}</span>`)}
         <div class="c-mid"><span class="price"><small>${unitLabel(p)}</small>${fmtU(a.cur)}원</span>${a.count > 1 ? spark(a.h) : ''}</div>
         <div class="unit">${p.qty.toLocaleString('ko-KR')}${p.unit} 약 ${won(packPrice(p, a.cur))}${a.seller ? ` · ${esc(a.seller)}` : ''} · ${a.date.slice(5).replace('-', '/')} 기준</div>
         <div class="c-bot"><span>${note}</span>${link}</div>
@@ -462,5 +515,6 @@
     $('.sheet').scrollTop = 0;
     document.body.style.overflow = 'hidden';
     pushLayer('modal');
+    layerOpened($('#modal'), '#mClose');
   }
 })();
