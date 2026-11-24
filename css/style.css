@@ -325,3 +325,26 @@ body{background:linear-gradient(180deg,#fff1ea 0,var(--bg) 380px) no-repeat,var(
 @media (min-width:1200px){
   .top .wrap{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 330 150'%3E%3Cpath d='M8 110 L60 84 L112 96 L164 58 L216 70 L268 34 L322 52' fill='none' stroke='%237c6cf0' stroke-width='7' stroke-linecap='round' stroke-linejoin='round' opacity='.35'/%3E%3Ccircle cx='322' cy='52' r='11' fill='%23e8643b' opacity='.8'/%3E%3Cline x1='8' y1='78' x2='322' y2='78' stroke='%23e8643b' stroke-width='3' stroke-dasharray='8 7' opacity='.45'/%3E%3C/svg%3E") no-repeat right 250px center/260px 118px}
 }
+
+/* ===== 카테고리(섹션)별 포인트 색 =====
+   dark: 흰 글자와 대비 4.5:1 이상 / soft: 배경용 연한 색.
+   초록(저렴)·빨강(비쌈)·노랑(기록 중)은 판단 배지에만 쓰므로 카테고리 색에서 제외. CTA 버튼은 브랜드 색 유지. */
+:root{--cat:#c94a24;--cat-soft:#ffe3d6}
+body[data-cat="diaper"]{--cat:#c94a24;--cat-soft:#ffe3d6}
+body[data-cat="formula"]{--cat:#2f62c4;--cat-soft:#dbe9ff}
+body[data-cat="pacifier"]{--cat:#6a4fd0;--cat-soft:#e8e0ff}
+body[data-cat="bottle"]{--cat:#17788f;--cat-soft:#d3eef5}
+body[data-cat="nipple"]{--cat:#a8327a;--cat-soft:#fbe0ef}
+body[data-cat="etc"]{--cat:#7a5c36;--cat-soft:#f1e6d6}
+.tab[data-cat="diaper"]{--c:#c94a24}.tab[data-cat="formula"]{--c:#2f62c4}.tab[data-cat="pacifier"]{--c:#6a4fd0}
+.tab[data-cat="bottle"]{--c:#17788f}.tab[data-cat="nipple"]{--c:#a8327a}.tab[data-cat="etc"]{--c:#7a5c36}
+.tab{display:inline-flex;align-items:center;gap:7px}
+.tab::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c);flex:0 0 auto}
+.tab.on{background:var(--c);border-color:var(--c);color:#fff}
+.tab.on::before{background:#fff}
+body[data-cat] .card{box-shadow:inset 0 3px 0 var(--cat)}
+body[data-cat] .thumb{background:var(--cat-soft)}
+body[data-cat] .chip.on,body[data-cat] .achip:not(.fav){background:var(--cat-soft);border-color:var(--cat)}
+body[data-cat] .count{border-left:4px solid var(--cat);padding-left:8px}
+body[data-cat] .brandbox{border-left:4px solid var(--cat)}
+body[data-cat] .stick{border-bottom-color:var(--cat-soft)}

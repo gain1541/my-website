@@ -220,6 +220,7 @@
   }
 
   function render() {
+    document.body.dataset.cat = state.cat; // 카테고리별 포인트 색(CSS 변수)용
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('on', t.dataset.cat === state.cat));
     const list = inCat();
     const brands = uniq(list.map((p) => p.brand));
