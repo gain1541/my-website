@@ -217,7 +217,7 @@
       else if (y < lastY - 8 || y <= 240) stick.classList.remove('hide');
       lastY = y;
     }, { passive: true });
-    fab.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    fab.addEventListener('click', () => window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }));
 
     if (DB.products.some((p) => p.links && p.links.coupang)) { $('#affNote').textContent = AFF_TEXT; $('#affNote').hidden = false; }
     render();
@@ -421,7 +421,7 @@
   };
   const kindOf = (p) => (p.cat === 'etc' ? (p.type === '물티슈' ? 'wipes' : p.type === '젖병 소독기' ? 'steril' : 'tube') : p.cat);
   // image(권리가 확인된 사진)가 있으면 아이콘 위에 덮어서 보여주고, 불러오지 못하면 아이콘이 남습니다.
-  const thumbHtml = (p) => ICONS[kindOf(p)] + (p.image ? `<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.remove()">` : '');
+  const thumbHtml = (p) => ICONS[kindOf(p)] + (p.image ? `<img src="${esc(p.image)}" alt="" width="56" height="56" loading="lazy" onerror="this.remove()">` : '');
 
   function renderActive() {
     const items = [];

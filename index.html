@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>아이톡톡 | 육아용품 가격비교</title>
   <meta name="theme-color" content="#d8947e">
   <meta property="og:type" content="website">
@@ -43,7 +43,7 @@
       <div class="bar">
         <label class="search">
           <span class="sr">검색</span>
-          <input id="q" type="search" placeholder="브랜드·제품명 검색" enterkeyhint="search">
+          <input id="q" type="search" name="q" autocomplete="off" spellcheck="false" placeholder="예: 하기스, 분유 2단계…" enterkeyhint="search">
         </label>
         <button id="openFilter" class="fbtn" type="button" aria-haspopup="dialog">필터<span id="fCount" class="fcount" hidden></span></button>
       </div>
@@ -189,17 +189,17 @@
 
         <div class="inq-field">
           <label for="inqProduct">제품명 또는 브랜드 <span class="inq-hint">선택</span></label>
-          <input id="inqProduct" type="text" name="entry.1527196073" placeholder="예: 하기스 네이처메이드 4단계" autocomplete="off">
+          <input id="inqProduct" type="text" name="entry.1527196073" placeholder="예: 하기스 네이처메이드 4단계…" autocomplete="off">
         </div>
 
         <div class="inq-field">
           <label for="inqDetail">자세한 내용 <b class="inq-req">*</b> <span class="inq-hint">참고 링크·용량·단계를 함께 적어 주세요</span></label>
-          <textarea id="inqDetail" name="entry.1979785717" required placeholder="예: 5단계 66매 구성도 같이 비교해 주세요."></textarea>
+          <textarea id="inqDetail" name="entry.1979785717" required placeholder="예: 5단계 66매 구성도 같이 비교해 주세요…"></textarea>
         </div>
 
         <div class="inq-field">
           <label for="inqEmail">답변 받을 이메일 <span class="inq-hint">선택 · 답변이 필요할 때만</span></label>
-          <input id="inqEmail" type="email" name="entry.225605618" placeholder="you@example.com" autocomplete="email" inputmode="email">
+          <input id="inqEmail" type="email" name="entry.225605618" placeholder="you@example.com" autocomplete="email" inputmode="email" spellcheck="false">
         </div>
 
         <div class="inq-hp" aria-hidden="true"><input type="text" name="inq_hp" tabindex="-1" autocomplete="off"></div>
