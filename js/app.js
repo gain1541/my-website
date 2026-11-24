@@ -336,7 +336,7 @@
   const overlap = (p, band) => { for (let m = band.a; m <= band.b; m++) if (monthMatch(p, m)) return true; return false; };
   const GSECTIONS = [
     { cat: 'diaper', title: '기저귀', tip: '기저귀는 월령보다 <b>체중</b>으로 단계를 골라요. 단계별 체중 기준은 브랜드마다 달라서 포장의 체중 기준을 꼭 확인하세요.' },
-    { cat: 'formula', title: '분유', tip: '분유 단계의 월령은 <b>브랜드마다 달라요.</b> 아래는 판매 페이지에 적힌 월령이에요.' },
+    { cat: 'formula', title: '분유', tip: '분유 단계의 월령은 <b>브랜드마다 달라요.</b> 아래는 판매 페이지에 적힌 월령이에요. 분유 선택·변경은 <b>소아청소년과와 상담</b>하세요.' },
     { cat: 'pacifier', title: '쪽쪽이', tip: '쪽쪽이는 월령별 사이즈(S1, S2)를 맞춰 쓰는 제품이에요.' },
     { cat: 'bottle', title: '분유병(젖병)', tip: '젖병은 월령보다 <b>수유량</b>에 맞춰 용량을 골라요. 세트에 들어 있는 젖꼭지의 단계·사이즈는 구성마다 달라요.', noList: true },
     { cat: 'nipple', title: '젖꼭지(젖병용)', tip: '젖꼭지는 <b>단계(유속)·사이즈</b>를 아기에게 맞춰 바꿔 줘요. 단계별 월령은 브랜드마다 달라서 상품 상세에서 확인하고, <b>쓰는 젖병과 호환되는지</b> 꼭 확인하세요. 월령이 확인된 제품이 없어 목록은 "젖꼭지" 탭에서 보세요.', noList: true },
@@ -519,7 +519,7 @@
           <div class="stat"><small>${p.qty.toLocaleString('ko-KR')}${p.unit} 기준 환산</small><b>약 ${won(packPrice(p, a.cur))}</b></div>
         </div>
         ${a.count > 1 ? chart(a) : ''}
-        <p class="basis">배송비를 포함한 시장 최저가(비회원 기준, 멤버십·조건부 쿠폰 할인 제외)를 ${unitLabel(p)} 가격으로 환산한 값이에요. 기준일 ${esc(a.date)}${a.seller ? ` · ${esc(a.seller)}` : ''}</p>${/쿠팡/.test(a.seller) ? '<p class="basis wow">💡 쿠팡 로켓와우 회원은 로켓배송 상품의 배송비가 무료라 더 저렴할 수 있어요.</p>' : ''}
+        <p class="basis">확인한 판매처 중 배송비 포함 최저가(비회원 기준, 멤버십·조건부 쿠폰 할인 제외)를 ${unitLabel(p)} 가격으로 환산한 값이에요. 기준일 ${esc(a.date)}${a.seller ? ` · ${esc(a.seller)}` : ''}</p>${/쿠팡/.test(a.seller) ? '<p class="basis wow">💡 쿠팡 로켓와우 회원은 로켓배송 상품의 배송비가 무료라 더 저렴할 수 있어요.</p>' : ''}
         <table><thead><tr><th>기준일</th><th class="r">${unitLabel(p)} 가격</th><th class="r">판매처</th></tr></thead><tbody>
           ${rows.map((r) => `<tr><td>${esc(r.d)}</td><td class="r">${fmtU(r.u)}원</td><td class="r">${esc(r.s || '-')}</td></tr>`).join('')}
         </tbody></table>${brandBox}${reqLine}${btns}`;

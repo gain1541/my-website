@@ -361,3 +361,5 @@ body[data-cat] .stick{border-bottom-color:var(--cat-soft)}
 .unk{margin-top:8px}
 .unk summary{padding:8px 0;font-weight:700;font-size:.9rem;color:var(--muted);cursor:pointer}
 .gitem.nobar{grid-template-columns:1fr}
+.foot a{display:inline-block;padding:10px 0;text-decoration:underline}
+.foot .policy-links{margin-top:4px}
