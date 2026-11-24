@@ -59,14 +59,6 @@
             <b>필터</b>
             <button id="sheetClose" type="button" aria-label="닫기">✕</button>
           </div>
-          <label class="field">
-            <span>정렬</span>
-            <select id="sort">
-              <option value="diff">평균 대비 싼 순</option>
-              <option value="unit">단가 낮은 순</option>
-              <option value="name">이름순</option>
-            </select>
-          </label>
           <div class="group"><b>브랜드</b><div class="chips" id="fBrand"></div></div>
           <div class="group"><b>브랜드 등급</b><p class="ghint">브랜드의 가격 수준이에요(운영자 분류).</p><div class="chips" id="fTier"></div></div>
           <div class="group"><b>종류</b><div class="chips" id="fType"></div></div>
@@ -91,9 +83,11 @@
           <div class="count" id="count" role="status" aria-live="polite"></div>
           <div class="lh-right">
             <span id="asof" class="asof" hidden></span>
+            <label class="sortbox"><span class="sr">정렬</span><select id="sort"><option value="diff">평균 대비 싼 순</option><option value="unit">단가 낮은 순</option><option value="name">이름순</option></select></label>
             <button id="favToggle" class="achip fav" type="button" aria-pressed="false">♡ 관심만</button>
           </div>
         </div>
+        <p class="sorthint" id="sortHint" hidden>단계·구성이 다른 제품이 섞여 있어요. 정확히 비교하려면 필터에서 '단계'를 골라 보세요.</p>
         <div class="active" id="active"></div>
         <h2 class="sr">제품 목록</h2>
         <section class="grid" id="grid"><p class="empty">불러오는 중…</p></section>

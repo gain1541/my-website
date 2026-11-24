@@ -79,7 +79,8 @@
     .then((r) => r.json())
     .then((db) => { DB = db; init(); })
     .catch(() => {
-      $('#grid').innerHTML = '<p class="empty">데이터를 불러오지 못했어요. 잠시 뒤 새로고침해 주세요.</p>';
+      $('#grid').innerHTML = '<p class="empty">데이터를 불러오지 못했어요.<br><button type="button" class="btn" id="retry" style="margin-top:10px;padding:0 18px">다시 시도</button></p>';
+      const rb = document.getElementById('retry'); if (rb) rb.addEventListener('click', () => location.reload());
     });
 
   function analyze(p) {
@@ -137,6 +138,8 @@
     }
 
     $('#tabs').innerHTML = CATS.map((c) => `<button class="tab" data-cat="${c.id}">${c.label}</button>`).join('');
+    $('#tabs').addEventListener('scroll', () => tabsHint(false), { passive: true });
+    window.addEventListener('resize', () => tabsHint(false));
     $('#tabs').addEventListener('click', (e) => {
       const b = e.target.closest('.tab');
       if (!b) return;
@@ -190,7 +193,7 @@
       const it = e.target.closest('.gitem');
       if (it) { $('#guide').hidden = true; openModal(it.dataset.id); }
     });
-    $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeLayer(); });
+    $('#modal').addEventListener('click', (e) => { if (e.target.id === 'modal') closeLayer(); const sb = e.target.closest('[data-share]'); if (sb) shareLink(sb.dataset.share); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLayer(); });
     window.addEventListener('popstate', hideAll);
 
@@ -210,6 +213,16 @@
 
     if (DB.products.some((p) => p.links && p.links.coupang)) { $('#affNote').textContent = AFF_TEXT; $('#affNote').hidden = false; }
     render();
+    // 공유 링크(?p=제품ID)로 들어오면 해당 카테고리로 가서 상세를 엽니다
+    try {
+      const pid = new URLSearchParams(location.search).get('p');
+      const tp = pid && DB.products.find((x) => x.id === pid);
+      if (tp) {
+        history.replaceState(null, '', location.pathname + location.hash);
+        state.cat = tp.cat; store.set('cat', tp.cat); render();
+        openModal(tp.id);
+      }
+    } catch (e) { /* 무시 */ }
   }
 
   function toggleFav(id) {
@@ -235,7 +248,7 @@
   }
 
   // 시트/상세 열기·닫기 (모바일 뒤로가기 버튼으로 닫히도록 history 사용)
-  function pushLayer(k) { try { history.pushState({ layer: k }, ''); } catch (e) { /* 무시 */ } }
+  function pushLayer(k, url) { try { history.pushState({ layer: k }, '', url || location.href); } catch (e) { /* 무시 */ } }
   // 레이어(상세·가이드·필터)가 열리면 배경을 비활성(inert)하고 포커스를 안으로 옮기며, 닫으면 처음 눌렀던 곳으로 돌려놓습니다.
   const BG_SEL = 'header.top, #sampleNotice, #stick, main, footer, #toTop';
   let lastOpener = null;
@@ -275,9 +288,18 @@
       `<button class="chip ${set.has(v) ? 'on' : ''}" data-v="${esc(v)}" aria-pressed="${set.has(v)}">${esc(labelFn ? labelFn(v) : v)}</button>`).join('');
   }
 
+  // 탭이 가로로 넘칠 때: 선택한 탭을 보이게 하고, 오른쪽에 더 있음을 표시
+  function tabsHint(center) {
+    const tb = $('#tabs'); if (!tb) return;
+    const on = tb.querySelector('.tab.on');
+    if (center && on) tb.scrollLeft = Math.max(0, on.offsetLeft - (tb.clientWidth - on.offsetWidth) / 2);
+    const more = tb.scrollLeft + tb.clientWidth < tb.scrollWidth - 4;
+    tb.classList.toggle('more', more);
+  }
   function render() {
     document.body.dataset.cat = state.cat; // 카테고리별 포인트 색(CSS 변수)용
     document.querySelectorAll('.tab').forEach((t) => t.classList.toggle('on', t.dataset.cat === state.cat));
+    tabsHint(true);
     const list = inCat();
     const brands = uniq(list.map((p) => p.brand));
     chips('fBrand', brands, state.brand);
@@ -405,6 +427,15 @@
     fc.hidden = n === 0; fc.textContent = n;
   }
 
+  // 같은 단계끼리 단가 순위(기저귀: 종류+단계, 분유: 단계, 기타: 종류). 쪽쪽이·젖병·젖꼭지는 구성이 달라 제외.
+  const peerKey = (p) => (p.cat === 'diaper' ? `d|${p.type}|${p.stage}` : p.cat === 'formula' ? `f|${p.stage}` : p.cat === 'etc' ? `e|${p.type}` : null);
+  const isRef = (p) => /참고/.test(p.a.seller || '');
+  function peersOf(p) {
+    const k = peerKey(p);
+    if (!k || p.a.none) return null;
+    const list = DB.products.filter((q) => peerKey(q) === k && !q.a.none && !isRef(q)).sort((x, y) => x.a.cur - y.a.cur);
+    return list.length >= 3 && list.includes(p) ? list : null;
+  }
   function renderList() {
     renderActive();
     const list = inCat().filter((p) => {
@@ -424,7 +455,16 @@
       unit: by((a, b) => a.a.cur - b.a.cur),
       name: (a, b) => a.name.localeCompare(b.name, 'ko'),
     };
-    list.sort(sorters[state.sort]);
+    // 평균 대비 정렬은 판단이 나온 제품이 있을 때만 의미가 있어서, 없으면 선택지를 막고 단가순으로 보여줍니다
+    const anyJudged = inCat().some((p) => !p.a.none && p.a.judge !== 'pending');
+    const so = $('#sort'); so.querySelector('option[value=diff]').disabled = !anyJudged;
+    so.querySelector('option[value=diff]').textContent = anyJudged ? '평균 대비 싼 순' : '평균 대비 싼 순 (기록이 쌓이면)';
+    const eff = state.sort === 'diff' && !anyJudged ? 'unit' : state.sort;
+    so.value = eff;
+    list.sort(sorters[eff]);
+    // 단계·구성이 섞인 목록을 단가순으로 볼 때의 오해 방지 안내
+    const mixed = eff === 'unit' && peerKey(list[0] || {}) && new Set(list.map((p) => peerKey(p))).size > 1;
+    $('#sortHint').hidden = !mixed;
     $('#count').textContent = `${list.length}개 제품`;
     const fb = $('#favToggle');
     fb.classList.toggle('on', favOnly); fb.setAttribute('aria-pressed', favOnly);
@@ -448,12 +488,14 @@
           <div class="c-mid"><span class="price none">가격 수집 전</span></div>
           <div class="c-bot"><span class="unit">현재 가격은 링크에서 확인하세요</span>${link}</div></article>`;
       }
+      const pr = peersOf(p);
+      const rankHtml = pr ? `<div class="rank">${p.stage ? esc(p.stage) + ' ' : ''}${pr.length}개 중 <b>${pr.indexOf(p) + 1}위</b> (단가 싼 순)</div>` : '';
       const note = a.judge === 'pending'
         ? `<span class="diff pending">기록 ${a.count}회 · ${MIN_POINTS}회부터 판단</span>`
         : `<span class="diff ${a.judge}">평균 대비 ${pct(a.diff)}</span>${a.nearMin ? ' <span class="low">최저가 근접</span>' : ''}`;
       return `<article class="card" data-id="${p.id}">${top(`<span class="badge ${a.judge}">${JL[a.judge]}</span>`)}
         <div class="c-mid"><span class="price"><small>${unitLabel(p)}</small>${fmtU(a.cur)}원</span>${a.count > 1 ? spark(a.h) : ''}</div>
-        <div class="unit">${p.qty.toLocaleString('ko-KR')}${p.unit} 약 ${won(packPrice(p, a.cur))}${a.seller ? ` · ${esc(a.seller)}` : ''} · ${a.date.slice(5).replace('-', '/')} 기준</div>
+        <div class="unit">${p.qty.toLocaleString('ko-KR')}${p.unit} 약 ${won(packPrice(p, a.cur))}${a.seller ? ` · ${esc(a.seller)}` : ''} · ${a.date.slice(5).replace('-', '/')} 기준</div>${rankHtml}
         <div class="c-bot"><span>${note}</span>${link}</div>
       </article>`;
     }).join('');
@@ -489,12 +531,31 @@
     </svg>`;
   }
 
+  function peerBox(p) {
+    const pr = peersOf(p); if (!pr) return '';
+    const top = pr.slice(0, 5); if (!top.includes(p)) top.push(p);
+    return `<div class="peers"><b>같은 단계 비교${p.stage ? ` (${esc(p.stage)})` : ''}</b><ol>${top.map((q) => `<li class="${q === p ? 'me' : ''}"><span>${pr.indexOf(q) + 1}위 · ${esc(q.name)}</span><em>${fmtU(q.a.cur)}원</em></li>`).join('')}</ol><p class="basis">${pr.length}개 제품 중 순위예요. 포장 수량·구성이 달라 단가만으로 판단하기 어려울 수 있어요.</p></div>`;
+  }
+  function shareLink(id) {
+    const url = location.origin + location.pathname + '?p=' + encodeURIComponent(id);
+    const p = DB.products.find((x) => x.id === id);
+    const toast = (m) => {
+      let t = document.getElementById('toast');
+      if (!t) { t = document.createElement('div'); t.id = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+      t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2200);
+    };
+    if (navigator.share) { navigator.share({ title: `${p.name} | 아이톡톡`, url }).catch(() => {}); return; }
+    const done = () => toast('링크를 복사했어요');
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, () => toast(url));
+    else toast(url);
+  }
   function openModal(id) {
     const p = DB.products.find((x) => x.id === id);
     const a = p.a;
     const b = DB.brands[p.brand];
     const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${p.age ? `<span class="age">대상: ${esc(p.age)}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>${p.note ? `<p class="basis note-line">ℹ️ ${esc(p.note)}</p>` : ''}${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
-    const btns = `<div class="btns"><a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a>${p.links && p.links.coupang ? (p.coupangNote ? '<p class="aff warn">' + esc(p.coupangNote) + '</p>' : '') + '<p class="aff">' + esc(AFF_TEXT) + '</p>' : ''}</div>`;
+    const shareBtn = `<button type="button" class="btn share" data-share="${esc(p.id)}">🔗 이 제품 링크 공유</button>`;
+    const btns = `<div class="btns">${shareBtn}<a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a>${p.links && p.links.coupang ? (p.coupangNote ? '<p class="aff warn">' + esc(p.coupangNote) + '</p>' : '') + '<p class="aff">' + esc(AFF_TEXT) + '</p>' : ''}</div>`;
     const reqLine = reqUrl ? `<p class="basis"><a class="req-inline" target="_blank" rel="noopener noreferrer" href="${esc(reqUrl)}">가격·정보가 달라요? 제보하기 ↗</a></p>` : '';
     const brandBox = b ? `<div class="binfo"><b>${esc(p.brand)}</b> ${tierTag(b.tier)} · ${esc(b.tagline)}<ul>${b.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
 
@@ -522,12 +583,12 @@
         <p class="basis">확인한 판매처 중 배송비 포함 최저가(비회원 기준, 멤버십·조건부 쿠폰 할인 제외)를 ${unitLabel(p)} 가격으로 환산한 값이에요. 기준일 ${esc(a.date)}${a.seller ? ` · ${esc(a.seller)}` : ''}</p>${/쿠팡/.test(a.seller) ? '<p class="basis wow">💡 쿠팡 로켓와우 회원은 로켓배송 상품의 배송비가 무료라 더 저렴할 수 있어요.</p>' : ''}
         <table><thead><tr><th>기준일</th><th class="r">${unitLabel(p)} 가격</th><th class="r">판매처</th></tr></thead><tbody>
           ${rows.map((r) => `<tr><td>${esc(r.d)}</td><td class="r">${fmtU(r.u)}원</td><td class="r">${esc(r.s || '-')}</td></tr>`).join('')}
-        </tbody></table>${brandBox}${reqLine}${btns}`;
+        </tbody></table>${peerBox(p)}${brandBox}${reqLine}${btns}`;
     }
     $('#modal').hidden = false;
     $('.sheet').scrollTop = 0;
     document.body.style.overflow = 'hidden';
-    pushLayer('modal');
+    pushLayer('modal', '?p=' + encodeURIComponent(id));
     layerOpened($('#modal'), '#mClose');
   }
 })();

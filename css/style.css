@@ -363,3 +363,31 @@ body[data-cat] .stick{border-bottom-color:var(--cat-soft)}
 .gitem.nobar{grid-template-columns:1fr}
 .foot a{display:inline-block;padding:10px 0;text-decoration:underline}
 .foot .policy-links{margin-top:4px}
+
+/* ---- 4단계: 순위·정렬·터치·글자 크기 ---- */
+.rank{font-size:.82rem;color:var(--ink);margin:2px 0 4px}
+.rank b{color:var(--cat,var(--accent))}
+.peers{margin:14px 0;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.peers ol{list-style:none;margin:8px 0 0;padding:0}
+.peers li{display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:.88rem;border-bottom:1px dashed var(--line)}
+.peers li.me{font-weight:800;background:var(--cat-soft,#f6efe9)}
+.peers li em{font-style:normal;white-space:nowrap}
+.sortbox select{min-height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;padding:0 8px;font-size:.9rem}
+.sorthint{font-size:.82rem;color:var(--pend);background:var(--pend-bg);border-radius:10px;padding:8px 10px;margin:6px 0}
+.tabs.more{-webkit-mask-image:linear-gradient(to right,#000 88%,transparent);mask-image:linear-gradient(to right,#000 88%,transparent)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:#2b2a33;color:#fff;padding:10px 16px;border-radius:999px;font-size:.9rem;opacity:0;pointer-events:none;transition:.2s;z-index:300;max-width:90vw;word-break:break-all}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.btn.share{flex:1 1 100%}
+@media (pointer:coarse),(max-width:899px){
+  .tab,.chip,.quick .chip,.achip,.achip.fav,.fbtn,.heart,.card-open{min-height:44px}
+  .heart{min-width:44px;display:inline-flex;align-items:center;justify-content:center}
+  .mini{display:inline-flex;align-items:center;min-height:44px;padding:0 0 0 10px}
+  summary{min-height:44px;display:flex;align-items:center;justify-content:space-between}
+  .foot a,.faq summary,.wtable summary,.unk summary{min-height:44px}
+}
+.tier,.gname small,.wrow small{font-size:.75rem}
+.top h1 small{font-size:max(.55em,12px)}
+.sub a,.foot .req-link{display:inline-block;padding:13px 4px;margin:-13px -4px}
+.foot .req-link{margin:0;padding:13px 0}
+#noticeClose{min-width:44px;min-height:44px}
+.faq p a{display:inline-block;padding:13px 2px;margin:-13px -2px}
