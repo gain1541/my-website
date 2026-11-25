@@ -453,3 +453,9 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
 .ptable{min-width:640px}
 .ptable thead th,.ptable td,.ptable tbody th{padding:8px 8px}
 .ptable tbody th{min-width:170px;max-width:230px}
+
+/* 모바일: 카드/표 보기 전환을 한 줄 전체 너비로 키워 터치하기 쉽게 */
+@media (max-width:899px){
+  .lh-right .viewtoggle{flex:1 1 100%;order:1}
+  .viewtoggle button{flex:1 1 50%;min-height:48px;font-size:.95rem}
+}
