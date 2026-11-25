@@ -229,6 +229,8 @@ const COUPANG_THUMBS = {
   p025: 'https://thumbnail4.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/image_audit/stage/manual/5f3e984e-bd25-44e5-bf1a-c32c97ae9e43_1792747608579.jpeg',
   p030: 'https://t5a.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/777a/540c8009e5d1a9ce56a12d8a9e8d48c5e1127b43f7c528df69bccaff9e8e.jpg',
   p031: 'https://thumbnail1.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/d63b/9cfdd7e95c0b79210d93be1147cf7098f14bfe7b5283aabc60c973e41017.jpg',
+  p064: 'https://thumbnail4.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/f98e/8f3b5ace5513e97cd09f47c0a239deaeb0e5fddbcb6b1c27a27e586b36e9.jpg',
+  p065: 'https://t2c.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/843f/6b3d36d55ec618f8481d157cb1f1d0501f43d9389bcde0acee95bfedf2ab.jpg',
   p040: 'https://thumbnail12.coupangcdn.com/thumbnails/remote/212x212ex/image/vendor_inventory/image_audit/advertiser/1777097143610/6f22993c-b59e-4c36-803c-84879e80a4f2.jpg',
 };
 for (const [id, url] of Object.entries(COUPANG_THUMBS)) {
