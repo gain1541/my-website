@@ -94,7 +94,7 @@
   let favOnly = false;
   let prevBrandCount = 0;
 
-  fetch('data/products.json')
+  fetch('data/products.json', { cache: 'no-cache' })
     .then((r) => r.json())
     .then((db) => { DB = db; init(); })
     .catch(() => {
