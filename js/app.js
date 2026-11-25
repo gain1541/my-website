@@ -55,7 +55,7 @@
     nipple: '젖꼭지 젖병젖꼭지 니플 수유',
     etc: '',
   };
-  const TYPE_ALIAS = { '물티슈': '물티슈 와이프 티슈', '로션·크림': '로션 크림 보습 스킨케어', '젖병 소독기': '소독기 살균 자외선 uv 건조 소독' };
+  const TYPE_ALIAS = { '물티슈': '물티슈 와이프 티슈', '로션·크림': '로션 크림 보습 스킨케어', '젖병 소독기': '소독기 살균 자외선 uv 건조 소독', '주방세제': '세정제 젖병세정제 젖병 세척 설거지 식기', '체온계': '체온 열 귀체온계 적외선' };
   const blobOf = (p) => {
     if (!p._s) {
       p._s = [p.name, p.brand, p.type, p.stage, p.age, p.fits, p.includes, CAT_ALIAS[p.cat], TYPE_ALIAS[p.type]].filter(Boolean).join(' ').toLowerCase();
