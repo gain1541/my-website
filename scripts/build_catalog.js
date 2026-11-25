@@ -204,8 +204,8 @@ meta('p074', { age: '7~12개월', months: [7, 12], note: '판매 페이지의 �
 meta('p075', { age: '0~6개월', months: [0, 6], note: '시그니처 라인 기준이에요. 프리미엄 라인과 가격·구성이 달라요.' });
 meta('p076', { age: '12~24개월', months: [12, 24], note: '시그니처 라인 기준이에요. 프리미엄 라인과 가격·구성이 달라요.' });
 const DIRECT = '국내 정식 유통 판매처가 확인되지 않아 해외직구(일본 구매대행) 최저가예요. 해외배송비 포함 기준이고 배송에 1~2주 이상 걸릴 수 있어요. 교환·반품 기준도 국내와 달라요. ';
-meta('p077', { includes: 'SS 젖꼭지', note: DIRECT + BOTTLE_NOTE });
-meta('p078', { includes: 'M 젖꼭지', note: DIRECT + '240ml는 일부 디자인만 재고가 있어요. ' + BOTTLE_NOTE });
+meta('p077', { includes: 'SS 젖꼭지', origin: '해외직구', note: DIRECT + BOTTLE_NOTE });
+meta('p078', { includes: 'M 젖꼭지', origin: '해외직구', note: DIRECT + '240ml는 일부 디자인만 재고가 있어요. ' + BOTTLE_NOTE });
 meta('p082', { note: '체온계는 단가 환산 없이 개당 가격이에요. 모델(IRT6030)이 같은 상품끼리 비교하세요.' });
 const LINE_NOTE = '오리지널 라인 단종으로 현행 라인 기준이에요. ';
 meta('p083', { note: LINE_NOTE + '판매 페이지 표기: 6~12kg. 쿠팡 판매자배송 상품이라 도착이 2~3일 걸릴 수 있어요.' });
