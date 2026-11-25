@@ -39,6 +39,25 @@
   const packPrice = (p, u) => Math.round((u * p.qty) / p.basis / 10) * 10; // 10원 단위 환산
   const pct = (d) => (d > 0 ? '+' : '') + (d * 100).toFixed(1) + '%';
   const uniq = (arr) => [...new Set(arr)];
+  const md = (d) => d.slice(5).replace('-', '/');
+  // 전 기록 대비 변동(두 번째 기록부터). 초록·빨강은 '지금 가격' 판단 배지 전용이라 중립색 + 화살표로만 표시
+  function chgInfo(a) {
+    if (!a || a.count < 2) return null;
+    const pv = a.h[a.h.length - 2], d = a.cur - pv.u, s = fmtU(Math.abs(d));
+    if (s === '0') return { dir: 'flat', date: md(pv.d), txt: '' };
+    return { dir: d > 0 ? 'up' : 'down', date: md(pv.d), txt: s + '원' };
+  }
+  const chgLong = (a) => {
+    const c = chgInfo(a); if (!c) return '';
+    if (c.dir === 'flat') return `<span class="chg flat">전 기록(${c.date})과 같아요</span>`;
+    return `<span class="chg ${c.dir}"><span aria-hidden="true">${c.dir === 'up' ? '▲' : '▼'}</span> 전 기록(${c.date}) 대비 ${c.txt} ${c.dir === 'up' ? '오름' : '내림'}</span>`;
+  };
+  const chgShort = (a) => {
+    const c = chgInfo(a); if (!c) return '<span class="muted">-</span>';
+    if (c.dir === 'flat') return '<span class="chg flat">변동 없음</span>';
+    return `<span class="chg ${c.dir}"><span aria-hidden="true">${c.dir === 'up' ? '▲' : '▼'}</span> ${c.txt}<span class="sr"> ${c.dir === 'up' ? '오름' : '내림'}</span></span>`;
+  };
+  const originTag = (p) => (p.origin ? `<span class="age orig">${esc(p.origin)} · 배송비 포함</span>` : '');
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* 저장 불가 환경 */ } },
@@ -58,7 +77,7 @@
   const TYPE_ALIAS = { '물티슈': '물티슈 와이프 티슈', '로션·크림': '로션 크림 보습 스킨케어', '젖병 소독기': '소독기 살균 자외선 uv 건조 소독', '주방세제': '세정제 젖병세정제 젖병 세척 설거지 식기', '체온계': '체온 열 귀체온계 적외선' };
   const blobOf = (p) => {
     if (!p._s) {
-      p._s = [p.name, p.brand, p.type, p.stage, p.age, p.fits, p.includes, CAT_ALIAS[p.cat], TYPE_ALIAS[p.type]].filter(Boolean).join(' ').toLowerCase();
+      p._s = [p.name, p.brand, p.type, p.stage, p.age, p.fits, p.includes, p.origin, CAT_ALIAS[p.cat], TYPE_ALIAS[p.type]].filter(Boolean).join(' ').toLowerCase();
       p._sn = p._s.replace(/\s+/g, '');
     }
     return p._s;
@@ -68,7 +87,7 @@
     return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => p._s.includes(w) || p._sn.includes(w));
   };
 
-  const state = { cat: 'diaper', tier: new Set(), brand: new Set(), type: new Set(), stage: new Set(), judge: new Set(), q: '', sort: 'diff' };
+  const state = { cat: 'diaper', tier: new Set(), brand: new Set(), type: new Set(), stage: new Set(), judge: new Set(), q: '', sort: 'diff', view: 'card' };
   let DB = null;
   let reqUrl = '';
   let favs = new Set();
@@ -130,8 +149,10 @@
       el.classList.toggle('stale', days > 7);
       el.hidden = false;
     }
+    $('#totals').textContent = `전체 ${DB.products.length}개 제품 · 가격 확인 ${DB.products.filter((p) => !p.a.none).length}개`;
     const savedCat = store.get('cat');
     if (CATS.some((c) => c.id === savedCat)) state.cat = savedCat;
+    if (store.get('view') === 'table') state.view = 'table';
     const savedSort = store.get('sort');
     if (['diff', 'unit', 'name'].includes(savedSort)) { state.sort = savedSort; $('#sort').value = savedSort; }
 
@@ -193,9 +214,13 @@
     $('#grid').addEventListener('click', (e) => {
       const hb = e.target.closest('.heart');
       if (hb) { toggleFav(hb.dataset.fav); return; }
-      if (!e.target.closest('a')) open(e.target.closest('.card'));
+      if (!e.target.closest('a')) open(e.target.closest('.card, tr[data-id]'));
     });
     $('#favToggle').addEventListener('click', () => { favOnly = !favOnly; renderList(); });
+    $('#viewToggle').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-view]'); if (!b || b.dataset.view === state.view) return;
+      state.view = b.dataset.view; store.set('view', state.view); renderList();
+    });
     $('#mClose').addEventListener('click', closeLayer);
     $('#openGuide').addEventListener('click', openGuide);
     $('#gClose').addEventListener('click', closeLayer);
@@ -496,7 +521,11 @@
     const cn = $('#crossNote');
     cn.hidden = cross.length === 0;
     cn.innerHTML = cross.length ? `다른 카테고리에서도 찾았어요: ${cross.map(([c, n]) => `<button type="button" class="xcat" data-cat="${c.id}">${esc(c.label)} ${n}개</button>`).join('')}` : '';
-    $('#grid').innerHTML = list.map((p) => {
+    document.querySelectorAll('#viewToggle [data-view]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.view === state.view));
+    const g = $('#grid');
+    g.classList.toggle('tbl', state.view === 'table');
+    if (state.view === 'table') { g.innerHTML = tableHtml(list); return; }
+    g.innerHTML = list.map((p) => {
       const a = p.a;
       // 가격을 낸 판매처가 쿠팡이면 쿠팡 버튼을 앞에 둡니다(카드의 가격과 버튼이 같은 곳을 가리키게)
       const naverBtn = `<a class="cta" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교 ↗</a>`;
@@ -504,7 +533,7 @@
       const link = `<div class="c-cta">${!a.none && /^쿠팡/.test(a.seller || '') ? coupangBtn + naverBtn : naverBtn + coupangBtn}</div>`;
       const isFav = favs.has(p.id);
       const heart = `<button type="button" class="heart ${isFav ? 'on' : ''}" data-fav="${p.id}" aria-pressed="${isFav}" aria-label="${esc(p.name)} 관심 ${isFav ? '해제' : '추가'}">${isFav ? '♥' : '♡'}</button>`;
-      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3 class="c-name"><button type="button" class="card-open" aria-label="${esc(p.name)} 상세 보기">${esc(p.name)}</button></h3>${ageTag(p) ? `<span class="age">${esc(ageTag(p))}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>`;
+      const top = (badge) => `<div class="c-top"><span class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</span><span class="c-right">${badge}${heart}</span></div><div class="c-main"><div class="thumb ${kindOf(p)}">${thumbHtml(p)}</div><div class="c-text"><h3 class="c-name"><button type="button" class="card-open" aria-label="${esc(p.name)} 상세 보기">${esc(p.name)}</button></h3>${ageTag(p) ? `<span class="age">${esc(ageTag(p))}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}${originTag(p)}</div></div>`;
       if (a.none) {
         return `<article class="card nodata" data-id="${p.id}">${top('<span class="badge pending">대기</span>')}
           <div class="c-mid"><span class="price none">가격 수집 전</span></div>
@@ -518,10 +547,26 @@
         : `<span class="diff ${a.judge}">평균 대비 ${pct(a.diff)}</span>${a.nearMin ? ' <span class="low">최저가 근접</span>' : ''}`;
       return `<article class="card" data-id="${p.id}">${top(`<span class="badge ${a.judge}">${JL[a.judge]}</span>`)}
         <div class="c-mid"><span class="price"><small>${unitLabel(p)}</small>${fmtU(a.cur)}원</span>${a.count > 1 ? spark(a.h) : ''}</div>
-        <div class="unit">${p.qty.toLocaleString('ko-KR')}${p.unit} 약 ${won(packPrice(p, a.cur))}${a.seller ? ` · ${esc(a.seller)}` : ''} · ${a.date.slice(5).replace('-', '/')} 기준</div>${rankHtml}
+        <div class="unit">${p.qty.toLocaleString('ko-KR')}${p.unit} 약 ${won(packPrice(p, a.cur))}${a.seller ? ` · ${esc(a.seller)}` : ''} · ${md(a.date)} 확인</div>${chgLong(a) ? `<div class="unit">${chgLong(a)}</div>` : ''}${rankHtml}
         ${note ? `<div class="c-note">${note}</div>` : ''}${link}
       </article>`;
     }).join('');
+  }
+
+  // 표(단가) 보기: 같은 기준의 단가를 한 줄씩 비교. 가로로 넓어서 모바일에서는 좌우 스크롤.
+  function tableHtml(list) {
+    if (!list.length) return '';
+    const rows = list.map((p) => {
+      const a = p.a;
+      const nm = `<button type="button" class="card-open" aria-label="${esc(p.name)} 상세 보기">${esc(p.name)}</button><small>${esc(p.brand)}${p.origin ? ` · ${esc(p.origin)}` : ''}</small>`;
+      if (a.none) return `<tr data-id="${p.id}"><th scope="row">${nm}</th><td colspan="6" class="muted">가격 수집 전</td></tr>`;
+      return `<tr data-id="${p.id}"><th scope="row">${nm}</th>
+        <td class="r"><b>${fmtU(a.cur)}원</b><small>${unitLabel(p)}</small></td>
+        <td class="r">${p.qty.toLocaleString('ko-KR')}${p.unit}<small>약 ${won(packPrice(p, a.cur))}</small></td>
+        <td>${a.seller ? esc(a.seller) : '-'}</td><td>${md(a.date)}</td><td>${chgShort(a)}</td>
+        <td><span class="badge ${a.judge}">${JL[a.judge]}</span></td></tr>`;
+    }).join('');
+    return `<div class="tablewrap" tabindex="0" role="region" aria-label="단가 표 (좌우로 스크롤)"><table class="ptable"><thead><tr><th scope="col">제품</th><th scope="col" class="r">단가</th><th scope="col" class="r">구성 환산</th><th scope="col">판매처</th><th scope="col">확인일</th><th scope="col">변동</th><th scope="col">지금 가격</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   }
 
   function chart(a) {
@@ -576,7 +621,7 @@
     const p = DB.products.find((x) => x.id === id);
     const a = p.a;
     const b = DB.brands[p.brand];
-    const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${ageTag(p) ? `<span class="age">대상: ${esc(ageTag(p))}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}</div></div>${p.note ? `<p class="basis note-line">ℹ️ ${esc(p.note)}</p>` : ''}${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
+    const head = `<div class="m-head"><div class="thumb big ${kindOf(p)}">${thumbHtml(p)}</div><div><div class="brandname">${esc(p.brand)} ${tierTag(tierOf(p))}</div><h2 id="mTitle">${esc(p.name)}</h2>${ageTag(p) ? `<span class="age">대상: ${esc(ageTag(p))}</span>` : ''}${p.fits ? `<span class="age fit">${esc(p.fits)}</span>` : ''}${p.includes ? `<span class="age inc">포함 젖꼭지 ${esc(p.includes)}</span>` : ''}${originTag(p)}</div></div>${p.note ? `<p class="basis note-line">ℹ️ ${esc(p.note)}</p>` : ''}${p.image && p.imageCredit ? `<p class="basis">사진: ${esc(p.imageCredit)}</p>` : ''}`;
     const shareBtn = `<button type="button" class="btn share" data-share="${esc(p.id)}">🔗 이 제품 링크 공유</button>`;
     const btns = `<div class="btns">${shareBtn}<a class="btn primary" target="_blank" rel="noopener noreferrer" href="${esc(naverUrl(p))}">네이버 가격 비교</a><a class="btn" target="_blank" rel="${p.links && p.links.coupang ? 'sponsored nofollow ' : ''}noopener noreferrer" href="${esc(coupangUrl(p))}">쿠팡에서 보기</a>${p.links && p.links.coupang ? (p.coupangNote ? '<p class="aff warn">' + esc(p.coupangNote) + '</p>' : '') + '<p class="aff">' + esc(AFF_TEXT) + '</p>' : ''}</div>`;
     const reqLine = reqUrl ? `<p class="basis"><a class="req-inline" target="_blank" rel="noopener noreferrer" href="${esc(reqUrl)}">가격·정보가 달라요? 제보하기 ↗</a></p>` : '';
