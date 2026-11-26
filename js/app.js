@@ -163,8 +163,8 @@
     else if (withData.every((p) => p.a.judge === 'pending')) {
       // 가장 빠른 판단 시작 예정일(첫 기록일 + 최소 기간). 카드마다 반복하지 않고 여기서 한 번만 알려줍니다.
       const soon = new Date(Math.min(...withData.map((p) => Date.parse(p.a.h[0].d))) + MIN_SPAN * DAY);
-      const when = soon.getTime() > Date.now() ? ` 가장 빠르면 <b>${soon.getMonth() + 1}/${soon.getDate()}경</b>부터예요.` : '';
-      msg = `📈 가격 기록을 쌓는 중이에요. <b>${MIN_POINTS}회 이상, 3주 이상</b> 쌓이면 싼지 비싼지 알려드려요.${when}`;
+      const when = soon.getTime() > Date.now() ? ` 가장 빠르면 <b>${soon.getMonth() + 1}월 ${soon.getDate()}일</b>부터 "평소보다 싼지" 보여드릴 수 있어요.` : '';
+      msg = `📈 지금은 가격을 모으는 중이에요. <b>${MIN_POINTS}회 이상·3주 넘게</b> 기록이 쌓이면 평소보다 싼지 알려드려요. 그전에도 카드에서 <b>단계별 단가</b>를 바로 비교할 수 있어요.${when}`;
     }
     if (msg && store.get('noticeClosed') !== msg) {
       nt.innerHTML = msg; $('#sampleNotice').hidden = false;
@@ -405,7 +405,7 @@
     { cat: 'formula', title: '분유', tip: '분유 단계의 월령은 <b>브랜드마다 달라요.</b> 아래는 판매 페이지에 적힌 월령이에요. 분유 선택·변경은 <b>소아청소년과와 상담</b>하세요.' },
     { cat: 'pacifier', title: '쪽쪽이', tip: '쪽쪽이는 월령별 사이즈(S1, S2)를 맞춰 쓰는 제품이에요.' },
     { cat: 'bottle', title: '분유병(젖병)', tip: '젖병은 월령보다 <b>수유량</b>에 맞춰 용량을 골라요. 세트에 들어 있는 젖꼭지의 단계·사이즈는 구성마다 달라요.', noList: true },
-    { cat: 'nipple', title: '젖꼭지(젖병용)', tip: '젖꼭지는 <b>단계(유속)·사이즈</b>를 아기에게 맞춰 바꿔 줘요. 단계별 월령은 브랜드마다 달라서 상품 상세에서 확인하고, <b>쓰는 젖병과 호환되는지</b> 꼭 확인하세요. 월령이 확인된 제품이 없어 목록은 "젖꼭지" 탭에서 보세요.', noList: true },
+    { cat: 'nipple', title: '젖꼭지(젖병용)', tip: '젖꼭지는 <b>단계(유속)·사이즈</b>를 아기에게 맞춰 바꿔 줘요. 단계별 월령은 브랜드마다 달라서 상품 상세에서 확인하고, <b>쓰는 젖병과 호환되는지</b> 꼭 확인하세요. 사이즈별 단가는 목록의 "젖꼭지(젖병용)" 탭에서 비교할 수 있어요.', noList: true },
   ];
 
   function renderGuide() {
@@ -428,9 +428,9 @@
       const rows = sec.noList ? '' : (items.length
         ? `<div class="axis"><span></span><div><span>0</span><span>6</span><span>12</span><span>18</span><span>24개월</span></div></div>` + items.map((p) =>
           `<button class="gitem" data-id="${p.id}"><span class="gname"><small>${esc(p.brand)}</small>${esc(p.name)}${ageTag(p) ? ` <em class="age">${esc(ageTag(p))}</em>` : ''}</span>${bar(p)}</button>`).join('')
-        : (sec.cat === 'diaper' ? '' : `<p class="gempty">이 월령에 맞는 ${sec.title} 정보는 확인 중이에요.</p>`));
+        : (sec.cat === 'diaper' ? '' : `<p class="gempty">${sec.cat === 'bottle' ? '젖병은 월령보다 <b>수유량</b>에 맞춰 용량을 골라요. 목록의 "분유병(젖병)" 탭에서 용량별 단가를 비교해 보세요.' : sec.cat === 'nipple' ? '젖꼭지는 <b>단계(유속)·사이즈</b>로 골라요. 목록의 "젖꼭지(젖병용)" 탭에서 사이즈별로 비교해 보세요.' : `이 월령에 맞는 ${sec.title} 정보는 준비 중이에요.`}</p>`));
       const unk = (sec.noList || sec.cat === 'diaper') ? [] : DB.products.filter((p) => p.cat === sec.cat && !p.months);
-      const unkHtml = unk.length ? `<details class="unk"><summary>월령 확인 중인 제품 ${unk.length}개</summary><p class="wnote">판매 페이지에서 월령이 확인되지 않아 위 목록에 없어요. 목록에 없다고 맞지 않는 제품은 아니에요. 눌러서 상세를 보고 포장 표기를 확인하세요.</p>` +
+      const unkHtml = unk.length ? `<details class="unk"><summary>월령 표기가 없는 제품 ${unk.length}개</summary><p class="wnote">판매 페이지에 월령 표기가 없어 위 목록에는 넣지 않았어요. 목록에 없다고 맞지 않는 제품은 아니에요. 눌러서 상세를 보고 포장 표기를 확인하세요.</p>` +
         unk.map((p) => `<button class="gitem nobar" data-id="${p.id}"><span class="gname"><small>${esc(p.brand)}</small>${esc(p.name)}${p.stage ? ` <em class="age">${esc(p.stage)}</em>` : ''}</span></button>`).join('') + '</details>' : '';
       return `<section class="gsec"><h3>${sec.title}</h3><p class="gtip">${sec.tip}</p>${sec.cat === 'diaper' ? weightHtml() : ''}${rows}${unkHtml}</section>`;
     }).join('') + '<p class="basis">월령은 쇼핑몰 판매 페이지에 적힌 표기를 옮긴 참고용이에요. 예를 들어 0~6개월 제품은 6개월 전까지, 6~12개월 제품은 6개월부터예요. 아기마다 성장이 달라서 정확한 기준은 제품 포장에서 확인하세요. 월령이 확인된 제품만 표시돼요.</p>';
