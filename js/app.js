@@ -549,7 +549,7 @@
     document.querySelectorAll('#viewToggle [data-view]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.view === state.view));
     const g = $('#grid');
     g.classList.toggle('tbl', state.view === 'table');
-    if (state.view === 'table') { g.innerHTML = tableHtml(list); return; }
+    if (state.view === 'table') { g.innerHTML = tableHtml(list, anyJudged); return; }
     g.innerHTML = list.map((p) => {
       const a = p.a;
       // 가격을 낸 판매처가 쿠팡이면 쿠팡 버튼을 앞에 둡니다(카드의 가격과 버튼이 같은 곳을 가리키게)
@@ -580,20 +580,22 @@
     }).join('');
   }
 
-  // 표(단가) 보기: 같은 기준의 단가를 한 줄씩 비교. 가로로 넓어서 모바일에서는 좌우 스크롤.
-  function tableHtml(list) {
+  // 표(단가) 보기: 같은 기준의 단가를 한 줄씩 비교. 
+  // 모바일에서는 CSS가 한 줄을 목록 한 칸으로 바꿉니다. display가 바뀌어도 표로 읽히도록 role을 명시합니다.
+  function tableHtml(list, anyJudged) {
     if (!list.length) return '';
     const rows = list.map((p) => {
       const a = p.a;
-      const nm = `<button type="button" class="card-open" aria-label="${esc(p.name)} 상세 보기">${esc(p.name)}</button><small>${esc(p.brand)}${p.origin ? ` · ${esc(p.origin)}` : ''}</small>`;
-      if (a.none) return `<tr data-id="${p.id}"><th scope="row">${nm}</th><td colspan="6" class="muted">가격 수집 전</td></tr>`;
-      return `<tr data-id="${p.id}"><th scope="row">${nm}</th>
-        <td class="r"><b>${fmtU(a.cur)}원</b><small>${unitLabel(p)}</small></td>
-        <td class="r">${p.qty.toLocaleString('ko-KR')}${p.unit}<small>약 ${won(packPrice(p, a.cur))}</small></td>
-        <td>${a.seller ? esc(a.seller) : '-'}</td><td>${md(a.date)}</td><td>${chgShort(a)}</td>
-        <td><span class="badge ${a.judge}">${JL[a.judge]}</span></td></tr>`;
+      const nm = `<button type="button" class="card-open" aria-label="${esc(p.name)} 상세 보기">${esc(p.name)}</button><small${!p.origin && p.name.includes(p.brand) ? ' class="t-empty"' : ''}>${esc(p.brand)}${p.origin ? ` · ${esc(p.origin)}` : ''}</small>`;
+      if (a.none) return `<tr role="row" data-id="${p.id}"><th role="rowheader" scope="row">${nm}</th><td role="cell" colspan="6" class="muted t-none">가격 수집 전</td></tr>`;
+      // 모바일 목록에서는 값이 없는 '변동'과, 판단이 하나도 없을 때의 '기록 중'을 숨깁니다.
+      return `<tr role="row" data-id="${p.id}"><th role="rowheader" scope="row">${nm}</th>
+        <td role="cell" class="r t-price"><b>${fmtU(a.cur)}원</b><small>${unitLabel(p)}</small></td>
+        <td role="cell" class="r t-pack">${p.qty.toLocaleString('ko-KR')}${p.unit}<small>약 ${won(packPrice(p, a.cur))}</small></td>
+        <td role="cell" class="t-seller">${a.seller ? esc(a.seller) : '-'}</td><td role="cell" class="t-date">${md(a.date)}</td><td role="cell" class="t-chg${chgInfo(a) ? '' : ' t-empty'}">${chgShort(a)}</td>
+        <td role="cell" class="t-judge${a.judge === 'pending' && !anyJudged ? ' t-empty' : ''}"><span class="badge ${a.judge}">${JL[a.judge]}</span></td></tr>`;
     }).join('');
-    return `<div class="tablewrap" tabindex="0" role="region" aria-label="단가 표 (좌우로 스크롤)"><table class="ptable"><thead><tr><th scope="col">제품</th><th scope="col" class="r">단가</th><th scope="col" class="r">구성 환산</th><th scope="col">판매처</th><th scope="col">확인일</th><th scope="col">변동</th><th scope="col">지금 가격</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    return `<div class="tablewrap" tabindex="0" role="region" aria-label="단가 표"><table class="ptable" role="table"><thead role="rowgroup"><tr role="row">${['제품', '단가', '구성 환산', '판매처', '확인일', '변동', '지금 가격'].map((h, i) => `<th role="columnheader" scope="col"${i === 1 || i === 2 ? ' class="r"' : ''}>${h}</th>`).join('')}</tr></thead><tbody role="rowgroup">${rows}</tbody></table></div>`;
   }
 
   function chart(a) {
