@@ -461,3 +461,15 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   .lh-right .viewtoggle{flex:1 1 100%;order:1}
   .viewtoggle button{flex:1 1 50%;min-height:48px;font-size:.95rem}
 }
+
+/* 첫 화면 정리: 안내는 한 줄 + '자세히', 제품 수는 한 줄, 기록 1회 상세는 값 2칸 */
+.nmore summary{display:block;list-style:none;cursor:pointer;padding:6px 0}
+.nmore summary::-webkit-details-marker{display:none}
+.nmore summary::after{content:none}
+.nmore p{margin:0 0 4px}
+.listhead .lh-left{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;column-gap:8px}
+#sampleNotice{padding-top:0;padding-bottom:0}
+.totals{padding-left:0}
+@media (min-width:900px){.stats.two{grid-template-columns:repeat(2,1fr)}}
+/* 모바일: 단계 버튼이 바로 위에 있어 섞임 안내는 생략 */
+@media (max-width:899px){.active .achip[data-k=stage]{display:none}.sorthint.has-quick{display:none}}
