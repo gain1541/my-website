@@ -7,7 +7,7 @@
     { id: 'nipple', label: '젖꼭지(젖병용)' },
     { id: 'etc', label: '기타 용품' },
   ];
-  const STAGE_ORDER = ['1단계(신생아)', '1단계', '2단계', '3단계', '4단계', '5단계', '대형(L)', '0~6개월', '6~12개월', '6~16개월', '6~18개월', 'SS', 'S', 'M', 'L', 'LL', '3L', '전연령'];
+  const STAGE_ORDER = ['1단계(신생아)', '1단계', '2단계', '3단계', '4단계', '5단계', '6단계', '중형(M)', '대형(L)', '특대형(XL)', '점보형(2XL)', '0~6개월', '6~12개월', '6~16개월', '6~18개월', 'SS', 'S', 'M', 'L', 'LL', '3L', '전연령'];
   const JUDGES = ['cheap', 'normal', 'pricey', 'pending'];
   // 필터·선택칩에서는 '평소 대비'임을 분명히 하는 긴 라벨을 씁니다.
   const JF = { cheap: '평소보다 저렴', normal: '평소 수준', pricey: '평소보다 비쌈', pending: '비교 준비 중' };
@@ -155,7 +155,7 @@
       el.classList.toggle('stale', days > 7);
       el.hidden = false;
     }
-    $('#totals').textContent = `전체 ${DB.products.length}개 제품 · 가격 확인 ${DB.products.filter((p) => !p.a.none).length}개`;
+    $('#totals').textContent = `전체 ${DB.products.length}개 · 가격 확인 ${DB.products.filter((p) => !p.a.none).length}개`;
     const savedCat = store.get('cat');
     if (CATS.some((c) => c.id === savedCat)) state.cat = savedCat;
     if (store.get('view') === 'table') state.view = 'table';
@@ -169,8 +169,10 @@
     else if (withData.every((p) => p.a.judge === 'pending')) {
       // 가장 빠른 판단 시작 예정일(첫 기록일 + 최소 기간). 카드마다 반복하지 않고 여기서 한 번만 알려줍니다.
       const soon = new Date(Math.min(...withData.map((p) => Date.parse(p.a.h[0].d))) + MIN_SPAN * DAY);
-      const when = soon.getTime() > Date.now() ? ` 가장 빠르면 <b>${soon.getMonth() + 1}월 ${soon.getDate()}일</b>부터 "평소보다 싼지" 보여드릴 수 있어요.` : '';
-      msg = `📈 지금은 가격을 모으는 중이에요. <b>${MIN_POINTS}회 이상·3주 넘게</b> 기록이 쌓이면 평소보다 싼지 알려드려요. 그전에도 카드에서 <b>단계별 단가</b>를 바로 비교할 수 있어요.${when}`;
+      const upcoming = soon.getTime() > Date.now();
+      const when = upcoming ? ` 가장 빠르면 <b>${soon.getMonth() + 1}월 ${soon.getDate()}일</b>부터 "평소보다 싼지" 보여드릴 수 있어요.` : '';
+      const head = `📈 가격 모으는 중${upcoming ? ` · <b>${soon.getMonth() + 1}/${soon.getDate()}</b>부터 판단` : ''}`;
+      msg = `<details class="nmore"><summary>${head} <u>자세히</u></summary><p><b>${MIN_POINTS}회 이상·3주 넘게</b> 기록이 쌓이면 평소보다 싼지 알려드려요. 그전에도 카드에서 <b>단계별 단가</b>를 바로 비교할 수 있어요.${when}</p></details>`;
     }
     if (msg && store.get('noticeClosed') !== msg) {
       nt.innerHTML = msg; $('#sampleNotice').hidden = false;
@@ -209,7 +211,8 @@
     $('#quick').addEventListener('click', (e) => {
       const b = e.target.closest('.chip');
       if (!b) return;
-      if (b.dataset.v === '') { state.brand.clear(); render(); } else toggle('brand', b.dataset.v);
+      const key = $('#quick').dataset.key; // 'stage' 또는 'brand'
+      if (b.dataset.v === '') { state[key].clear(); render(); } else toggle(key, b.dataset.v);
     });
     $('#active').addEventListener('click', (e) => {
       const b = e.target.closest('.achip');
@@ -336,6 +339,19 @@
       `<button class="chip ${set.has(v) ? 'on' : ''}" data-v="${esc(v)}" aria-pressed="${set.has(v)}">${esc(labelFn ? labelFn(v) : v)}</button>`).join('');
   }
 
+  // 모바일 빠른 선택: 단계(쪽쪽이는 월령)가 2개 이상이면 단계를, 아니면 브랜드를 보여줍니다.
+  function renderQuick(key, values) {
+    const q = $('#quick');
+    const same = q.dataset.cat === state.cat;
+    const left = q.scrollLeft;
+    const word = key === 'brand' ? '브랜드' : state.cat === 'pacifier' ? '월령' : state.cat === 'nipple' ? '단계·사이즈' : '단계';
+    q.dataset.key = key; q.dataset.cat = state.cat;
+    q.setAttribute('aria-label', `${word} 빠른 선택`);
+    const chip = (v, label, on) => `<button class="chip ${on ? 'on' : ''}" data-v="${esc(v)}" aria-pressed="${on}">${esc(label)}</button>`;
+    q.innerHTML = chip('', `전체 ${word}`, !state[key].size) + values.map((v) => chip(v, v, state[key].has(v))).join('');
+    q.scrollLeft = same ? left : 0; // 오른쪽 끝의 단계를 눌러도 위치가 유지되게
+  }
+
   // 탭이 가로로 넘칠 때: 선택한 탭을 보이게 하고, 오른쪽에 더 있음을 표시
   function tabsHint(center) {
     const tb = $('#tabs'); if (!tb) return;
@@ -362,8 +378,7 @@
     $('#fStage').parentElement.hidden = stages.length <= 1;
     $('#fStage').previousElementSibling.textContent = isPac ? '월령' : state.cat === 'nipple' ? '단계·사이즈' : '단계';
     chips('fJudge', JUDGES, state.judge, (v) => JF[v]);
-    $('#quick').innerHTML = `<button class="chip ${state.brand.size ? '' : 'on'}" data-v="">전체</button>` +
-      brands.map((b) => `<button class="chip ${state.brand.has(b) ? 'on' : ''}" data-v="${esc(b)}">${esc(b)}</button>`).join('');
+    renderQuick(stages.length > 1 ? 'stage' : 'brand', stages.length > 1 ? stages : brands);
     renderBrands(brands);
     if (state.brand.size !== prevBrandCount) { $('#brandInfo').open = state.brand.size > 0; prevBrandCount = state.brand.size; }
     // 모바일: 브랜드를 고르지 않았을 땐 '브랜드 특징'을 목록 아래로 보내 첫 화면에 제품이 보이게(CSS order)
@@ -467,12 +482,14 @@
 
   function renderActive() {
     const items = [];
+    // 빠른 선택이 단계일 때는 모바일에서 고른 브랜드가 안 보이므로 해제 칩으로 보여줍니다.
+    state.brand.forEach((v) => items.push(['brand', v, v]));
     state.tier.forEach((v) => items.push(['tier', v, TIERS.find((t) => t.id === v).label]));
     state.type.forEach((v) => items.push(['type', v, v]));
     state.stage.forEach((v) => items.push(['stage', v, v]));
     state.judge.forEach((v) => items.push(['judge', v, JF[v]]));
     $('#active').innerHTML = items.map(([k, v, l]) => `<button class="achip" data-k="${k}" data-v="${esc(v)}" aria-label="${esc(l)} 필터 해제">${esc(l)} ✕</button>`).join('');
-    const n = items.length + state.brand.size;
+    const n = items.length;
     const fc = $('#fCount');
     fc.hidden = n === 0; fc.textContent = n;
   }
@@ -515,6 +532,8 @@
     // 단계·구성이 섞인 목록을 단가순으로 볼 때의 오해 방지 안내
     const mixed = eff === 'unit' && peerKey(list[0] || {}) && new Set(list.map((p) => peerKey(p))).size > 1;
     $('#sortHint').hidden = !mixed;
+    // 모바일에서 단계 버튼이 보이는 카테고리는 안내를 숨깁니다(CSS). 데스크톱은 그대로.
+    $('#sortHint').classList.toggle('has-quick', $('#quick').dataset.key === 'stage');
     $('#count').textContent = `${list.length}개 제품`;
     const fb = $('#favToggle');
     fb.classList.toggle('on', favOnly); fb.setAttribute('aria-pressed', favOnly);
@@ -551,7 +570,9 @@
       const note = a.judge === 'pending'
         ? ''
         : `<span class="diff ${a.judge}">평균 대비 ${pct(a.diff)}</span>${a.nearMin ? ' <span class="low">최저가 근접</span>' : ''}`;
-      return `<article class="card" data-id="${p.id}">${top(`<span class="badge ${a.judge}">${JL[a.judge]}</span>`)}
+      // 이 카테고리에 판단이 하나도 없으면 모든 카드에 같은 '기록 중'이 붙으므로 생략(상단 안내와 상세에서 설명)
+      const badge = a.judge === 'pending' && !anyJudged ? '' : `<span class="badge ${a.judge}">${JL[a.judge]}</span>`;
+      return `<article class="card" data-id="${p.id}">${top(badge)}
         <div class="c-mid"><span class="price"><small>${unitLabel(p)}</small>${fmtU(a.cur)}원</span>${a.count > 1 ? spark(a.h) : ''}</div>
         <div class="unit">${p.qty.toLocaleString('ko-KR')}${p.unit} 약 ${won(packPrice(p, a.cur))}${a.seller ? ` · ${esc(a.seller)}` : ''} · ${md(a.date)} 확인</div>${chgLong(a) ? `<div class="unit">${chgLong(a)}</div>` : ''}${rankHtml}
         ${note ? `<div class="c-note">${note}</div>` : ''}${link}
@@ -647,17 +668,17 @@
       const rows = a.h.slice().reverse().slice(0, 10);
       $('#mBody').innerHTML = `${head}
         <div class="verdict ${a.judge}">${verdictText}</div>
-        <div class="stats">
+        <div class="stats${a.count > 1 ? '' : ' two'}">
           <div class="stat"><small>현재 ${unitLabel(p)}</small><b>${fmtU(a.cur)}원</b></div>
-          <div class="stat"><small>평균(최근 6개월)</small><b>${fmtU(a.avg)}원</b></div>
-          <div class="stat"><small>기록 중 최저</small><b>${fmtU(a.min)}원</b></div>
+          ${a.count > 1 ? `<div class="stat"><small>평균(최근 6개월)</small><b>${fmtU(a.avg)}원</b></div>
+          <div class="stat"><small>기록 중 최저</small><b>${fmtU(a.min)}원</b></div>` : ''}
           <div class="stat"><small>${p.qty.toLocaleString('ko-KR')}${p.unit} 기준 환산</small><b>약 ${won(packPrice(p, a.cur))}</b></div>
         </div>
         ${a.count > 1 ? chart(a) : ''}
         <p class="basis">확인한 판매처 중 배송비 포함 최저가(비회원 기준, 멤버십·조건부 쿠폰 할인 제외)를 ${unitLabel(p)} 가격으로 환산한 값이에요. 기준일 ${esc(a.date)}${a.seller ? ` · ${esc(a.seller)}` : ''}</p>${/쿠팡/.test(a.seller) ? '<p class="basis wow">💡 쿠팡 로켓와우 회원은 로켓배송 상품의 배송비가 무료라 더 저렴할 수 있어요.</p>' : ''}
-        <table><thead><tr><th>기준일</th><th class="r">${unitLabel(p)} 가격</th><th class="r">판매처</th></tr></thead><tbody>
+        ${a.count > 1 ? `<table><thead><tr><th>기준일</th><th class="r">${unitLabel(p)} 가격</th><th class="r">판매처</th></tr></thead><tbody>
           ${rows.map((r) => `<tr><td>${esc(r.d)}</td><td class="r">${fmtU(r.u)}원</td><td class="r">${esc(r.s || '-')}</td></tr>`).join('')}
-        </tbody></table>${peerBox(p)}${brandBox}${reqLine}${btns}`;
+        </tbody></table>` : ''}${peerBox(p)}${brandBox}${reqLine}${btns}`;
     }
     $('#modal').hidden = false;
     $('.sheet').scrollTop = 0;
