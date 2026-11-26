@@ -84,7 +84,13 @@
   };
   const matches = (p, q) => {
     blobOf(p);
-    return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => p._s.includes(w) || p._sn.includes(w));
+    const has = (w) => p._s.includes(w) || p._sn.includes(w);
+    // '하기스4단계'처럼 붙여 쓰면 숫자 앞에서 나눠 각각 찾습니다(통째로 맞으면 그대로 인정).
+    return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => {
+      if (has(w)) return true;
+      const parts = w.split(/(?<=[가-힣])(?=\d)/);
+      return parts.length > 1 && parts.every(has);
+    });
   };
 
   const state = { cat: 'diaper', tier: new Set(), brand: new Set(), type: new Set(), stage: new Set(), judge: new Set(), q: '', sort: 'diff', view: 'card' };
