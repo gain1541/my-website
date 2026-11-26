@@ -1,5 +1,5 @@
 :root{
-  --bg:#fff9f6; --card:#fff; --ink:#34333f; --muted:#68657a; --line:#eee3dd;
+  --bg:#f7e7dc; --card:#fffaf5; --ink:#34333f; --muted:#5f5c73; --line:#e3cdbd;
   --peach:#ffe3d6; --mint:#d6f2e8; --sky:#dbe9ff; --lav:#e8e0ff;
   --cheap:#1d6f52; --cheap-bg:#d6f2e8; --pricey:#b3322e; --pricey-bg:#ffdcdc; --normal:#555a66; --normal-bg:#ececf1;
   --pend:#8a5a00; --pend-bg:#fff0c9;
@@ -495,3 +495,28 @@ body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-ri
   .ptable .t-none{grid-area:2/1/3/5}
   .ptable .t-empty{display:none}
 }
+
+/* 2026-11-26 디자인 개선: 흰 바탕을 줄이고(따뜻한 베이지·카드 윗줄 색), 배너를 더 꽉 차 보이게. 글자 대비는 4.5:1 이상 유지 */
+body{background:linear-gradient(180deg,#f9d7c4 0,var(--bg) 460px) no-repeat,var(--bg)}
+.top{background:linear-gradient(120deg,#ffc7ab 0%,#ffd8c5 42%,#e6d9ff 100%);padding:16px 0 14px}
+.top h1{font-size:1.35rem;color:#2c2a38}
+.sub{color:#3a384c;font-size:.9rem}
+.top h1 small{color:#4a4860}
+.hero-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.hero-chips span{background:rgba(255,255,255,.72);border:1px solid rgba(120,80,60,.18);border-radius:999px;padding:4px 11px;font-size:.8rem;font-weight:700;color:#3a384c;white-space:nowrap}
+.top-in .hero-chips{grid-column:1/-1;grid-row:3}
+@media (min-width:900px){.top{padding:30px 0 26px}.top h1{font-size:2.1rem}.sub{font-size:1.05rem}.hero-chips span{font-size:.88rem;padding:5px 13px}}
+.notice{background:#ffe7b0;border-bottom:1px solid #efce80;color:#5a4000}
+.panel,.sheet-foot{background:#fdeee3}
+.side .panel{background:#fdeee3}
+.sheet,.btns,.gbands{background:var(--card)}
+body[data-cat] .card{overflow:hidden;box-shadow:none;background:var(--card)}
+.card.nodata{background:#fffdfb}
+.card .c-top{margin:-12px -14px 2px;padding:10px 14px 8px;background:var(--cat-soft);border-top:3px solid var(--cat)}
+.hero-chips{gap:5px}
+.hero-chips span{padding:3px 9px;font-size:.78rem}
+.tablewrap{background:var(--card)}
+.ptable thead th{background:#f6e0d2}
+.foot{background:#efd9ca;color:#4f4c63}
+.foot a{color:#3a384c}
+.listnote,.totals,.count,.asof{color:#4f4c63}
