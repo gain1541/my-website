@@ -92,6 +92,7 @@ h2{font-size:56px;font-weight:900;line-height:1.25}
 .pr b{display:block;font-size:50px;font-weight:900;font-variant-numeric:tabular-nums;color:#2b211c}
 .row.first .pr b{color:var(--c)}
 .pr span{display:block;font-size:24px;color:#6b5d55;margin-top:2px}
+.dense .rows{gap:12px;margin-top:28px}.dense .row{padding:14px 24px}.dense .rank{width:62px;height:62px;font-size:34px}.dense .nm span{font-size:30px}.dense .pr b{font-size:44px}.dense .note{margin-top:18px;font-size:24px}
 .note{font-size:26px;color:#6b5d55;line-height:1.5;margin-top:26px}
 ul.rules{list-style:none;margin-top:44px;display:flex;flex-direction:column;gap:26px}
 ul.rules li{font-size:38px;line-height:1.45;padding-left:64px;position:relative;font-weight:600}
@@ -137,7 +138,7 @@ function slides(g, logo) {
     out.push(shell(g, `${brandHead(logo)}<h2 style="margin-top:36px">${esc(g.title)} 단가 순위${pages > 1 ? ` (${i + 1}/${pages})` : ''}</h2>
       <div class="rows">${rows}</div>
       <p class="note">${i === 0 ? '막대가 길수록 단가가 높아요. ' : ''}판매 페이지 구성이 제품마다 달라 월령·팩 구성은 상세 페이지에서 확인하세요.</p>
-      ${foot(g, 2 + i, total)}`));
+      ${foot(g, 2 + i, total)}`, part.length >= 5 ? 'dense' : ''));
   }
 
   const health = g.cat === 'formula' ? '<div class="warn">분유 선택·전환은 아기마다 달라요. 가격만 보고 바꾸지 말고 소아청소년과와 상담하세요. 단계별 월령 표기는 브랜드마다 다를 수 있어요.</div>' : '';
