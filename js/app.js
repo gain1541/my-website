@@ -149,6 +149,7 @@
       el.classList.toggle('stale', days > 7);
       el.hidden = false;
     }
+    $('#heroCount').textContent = `📦 ${DB.products.length}개 제품`;
     $('#totals').textContent = `전체 ${DB.products.length}개 제품 · 가격 확인 ${DB.products.filter((p) => !p.a.none).length}개`;
     const savedCat = store.get('cat');
     if (CATS.some((c) => c.id === savedCat)) state.cat = savedCat;
