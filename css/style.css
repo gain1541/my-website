@@ -520,7 +520,7 @@ body[data-cat] .card{overflow:hidden;box-shadow:none;background:var(--card)}
 .foot a{color:#3a384c}
 .listnote,.totals,.count,.asof{color:#4f4c63}
 
-/* 2026-11-27 신뢰 요소: 기준 보기 패널, 배너 오른쪽 안내(도장·계산·과정 중 data-hero로 선택), 판단 진행 막대 */
+/* 2026-11-27 신뢰 요소: 기준 보기 패널, 배너 그림, 판단 진행 막대 */
 .hero-chips button{background:none;border:0;padding:0 2px;min-height:44px;display:inline-flex;align-items:center;margin:-8px 0}
 .hero-chips button span{background:rgba(255,255,255,.95);border-color:rgba(120,80,60,.3);color:#8f3414;font-weight:800}
 .hero-chips button[aria-expanded="true"] span{background:#8f3414;color:#fff;border-color:#8f3414}
@@ -528,9 +528,8 @@ body[data-cat] .card{overflow:hidden;box-shadow:none;background:var(--card)}
 .hero-basis{grid-column:1/-1;grid-row:4;margin-top:8px;max-width:640px;background:rgba(255,255,255,.82);border:1px solid rgba(120,80,60,.2);border-radius:12px;padding:8px 12px;font-size:.84rem;line-height:1.5;color:#34333f}
 .hero-basis p{margin:2px 0}
 .hero-basis b{color:#8f3414;margin-right:4px}
-/* 배너 그림(글자 없는 일러스트 3안, header.top[data-hero]로 선택): 모바일은 오른쪽 아래, 큰 화면은 오른쪽 가운데 */
-.hero-art{display:none;position:absolute;pointer-events:none;z-index:0;height:auto}
-.top[data-hero="items"] .hero-art[data-art="items"],.top[data-hero="mascot"] .hero-art[data-art="mascot"],.top[data-hero="mobile"] .hero-art[data-art="mobile"]{display:block}
+/* 배너 그림(마스코트+돋보기, 뒤에 가격 추이 그래프): 모바일은 오른쪽 아래, 큰 화면은 오른쪽 가운데 */
+.hero-art{display:block;overflow:visible;position:absolute;pointer-events:none;z-index:0;height:auto}
 .top .wrap>.hero-art{right:8px;bottom:4px;width:124px}
 .hero-chips,.hero-basis{position:relative;z-index:2}
 @media (max-width:899px){
