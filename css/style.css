@@ -521,8 +521,9 @@ body[data-cat] .card{overflow:hidden;box-shadow:none;background:var(--card)}
 .listnote,.totals,.count,.asof{color:#4f4c63}
 
 /* 2026-11-27 신뢰 요소: 기준 보기 패널, 배너 오른쪽 안내(도장·계산·과정 중 data-hero로 선택), 판단 진행 막대 */
-.hero-chips button{background:rgba(255,255,255,.95);border:1px solid rgba(120,80,60,.3);border-radius:999px;padding:3px 10px;font-size:.78rem;font-weight:800;color:#8f3414;min-height:28px}
-.hero-chips button[aria-expanded="true"]{background:#8f3414;color:#fff;border-color:#8f3414}
+.hero-chips button{background:none;border:0;padding:0 2px;min-height:44px;display:inline-flex;align-items:center;margin:-8px 0}
+.hero-chips button span{background:rgba(255,255,255,.95);border-color:rgba(120,80,60,.3);color:#8f3414;font-weight:800}
+.hero-chips button[aria-expanded="true"] span{background:#8f3414;color:#fff;border-color:#8f3414}
 .hero-chips{align-items:center}
 .hero-basis{grid-column:1/-1;grid-row:4;margin-top:8px;max-width:640px;background:rgba(255,255,255,.82);border:1px solid rgba(120,80,60,.2);border-radius:12px;padding:8px 12px;font-size:.84rem;line-height:1.5;color:#34333f}
 .hero-basis p{margin:2px 0}
