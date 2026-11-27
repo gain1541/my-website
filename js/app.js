@@ -156,6 +156,25 @@
       el.hidden = false;
     }
     $('#heroCount').textContent = `📦 ${DB.products.length}개 제품`;
+    // 기준 보기 패널: 단가 계산 예시는 실제 첫 제품(p001) 값으로 만들어 항상 사실과 맞게 유지
+    const ex = DB.products.find((x) => x.id === 'p001');
+    if (ex && !ex.a.none) {
+      const exTxt = `${ex.qty}${ex.unit} ${won(packPrice(ex, ex.a.cur))} ÷ ${ex.qty}${ex.unit} = ${unitLabel(ex)} ${fmtU(ex.a.cur)}원 (${ex.name})`;
+      $('#basisEx').textContent = exTxt;
+      
+    } else { $('#basisEx').textContent = '총 가격 ÷ 수량 = 1매당(100g당) 가격'; }
+    $('#basisBtn').addEventListener('click', () => {
+      const box = $('#basisBox'), on = box.hidden; box.hidden = !on; $('#basisBtn').setAttribute('aria-expanded', String(on));
+    });
+    // 다음 갱신일: 토요일 갱신 직후엔 일요일, 그 외엔 다음 토요일(주간 갱신 일정: 토 기저귀·분유·쪽쪽이 / 일 나머지)
+    const lastD = DB.products.flatMap((x) => (x.history || []).map((r) => r.d)).sort().pop();
+    if (lastD) {
+      const [ly, lm, ld] = lastD.split('-').map(Number), base = new Date(ly, lm - 1, ld), wd = base.getDay();
+      const nx = new Date(base); nx.setDate(base.getDate() + (wd === 6 ? 1 : (6 - wd + 7) % 7 || 7));
+      let ng = nx; const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+      while (ng < t0) ng = new Date(ng.getTime() + 7 * DAY); // 이미 지났으면 다음 주기로
+      $('#basisNext').textContent = `다음 갱신 ${ng.getMonth() + 1}/${ng.getDate()}(${'일월화수목금토'[ng.getDay()]})`;
+    }
     $('#totals').textContent = `전체 ${DB.products.length}개 · 가격 확인 ${DB.products.filter((p) => !p.a.none).length}개`;
     const savedCat = store.get('cat');
     if (CATS.some((c) => c.id === savedCat)) state.cat = savedCat;
@@ -599,6 +618,15 @@
     return `<div class="tablewrap" tabindex="0" role="region" aria-label="단가 표"><table class="ptable" role="table"><thead role="rowgroup"><tr role="row">${['제품', '단가', '구성 환산', '판매처', '확인일', '변동', '지금 가격'].map((h, i) => `<th role="columnheader" scope="col"${i === 1 || i === 2 ? ' class="r"' : ''}>${h}</th>`).join('')}</tr></thead><tbody role="rowgroup">${rows}</tbody></table></div>`;
   }
 
+  // 판단까지 진행도: 기록 횟수(최소 4회)와 기록 기간(최소 21일)
+  function meterHtml(a) {
+    const days = Math.max(0, Math.round((Date.parse(a.date) - Date.parse(a.h[0].d)) / DAY));
+    const pc = Math.min(100, Math.round((a.count / MIN_POINTS) * 100)), pd = Math.min(100, Math.round((days / MIN_SPAN) * 100));
+    return `<div class="meter" role="group" aria-label="판단까지 진행도">
+      <div class="mrow"><span>기록 횟수</span><span class="bar" aria-hidden="true"><i style="width:${pc}%"></i></span><b>${Math.min(a.count, MIN_POINTS)}/${MIN_POINTS}회</b></div>
+      <div class="mrow"><span>기록 기간</span><span class="bar" aria-hidden="true"><i style="width:${pd}%"></i></span><b>${Math.min(days, MIN_SPAN)}/${MIN_SPAN}일</b></div></div>`;
+  }
+
   function chart(a) {
     const W = 640, H = 240, L = 52, R = 12, T = 12, B = 28;
     const h = a.h;
@@ -670,7 +698,7 @@
       }[a.judge];
       const rows = a.h.slice().reverse().slice(0, 10);
       $('#mBody').innerHTML = `${head}
-        <div class="verdict ${a.judge}">${verdictText}</div>
+        <div class="verdict ${a.judge}">${verdictText}</div>${a.judge === 'pending' ? meterHtml(a) : ''}
         <div class="stats${a.count > 1 ? '' : ' two'}">
           <div class="stat"><small>현재 ${unitLabel(p)}</small><b>${fmtU(a.cur)}원</b></div>
           ${a.count > 1 ? `<div class="stat"><small>평균(최근 6개월)</small><b>${fmtU(a.avg)}원</b></div>

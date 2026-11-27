@@ -19,17 +19,43 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2215%22 fill=%22%23D8947E%22/%3E%3Cpath d=%22M18 16h28a8 8 0 0 1 8 8v16a8 8 0 0 1-8 8H31l-9 8v-8h-4a8 8 0 0 1-8-8V24a8 8 0 0 1 8-8z%22 fill=%22%23EFEDEB%22/%3E%3Cellipse cx=%2226%22 cy=%2230%22 rx=%222.2%22 ry=%222.8%22 fill=%22%236B4A40%22/%3E%3Cellipse cx=%2238%22 cy=%2230%22 rx=%222.2%22 ry=%222.8%22 fill=%22%236B4A40%22/%3E%3Cpath d=%22M27 37q5 5 10 0%22 stroke=%22%236B4A40%22 stroke-width=%222.4%22 fill=%22none%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
   <link rel="apple-touch-icon" href="img/icon-180.png">
   <meta name="description" content="아이톡톡 가격비교: 기저귀·분유·쪽쪽이·젖병 등 육아용품의 시장 최저 단가 추이를 보고, 지금 가격이 싼지 비싼지 확인하세요.">
-  <link rel="stylesheet" href="css/style.css?v=20261127d">
+  <link rel="stylesheet" href="css/style.css?v=20261127m">
 </head>
 <body>
   <header class="top">
     <div class="wrap top-in">
       <div>
         <h1><svg class="logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#D8947E"/><path d="M18 16h28a8 8 0 0 1 8 8v16a8 8 0 0 1-8 8H31l-9 8v-8h-4a8 8 0 0 1-8-8V24a8 8 0 0 1 8-8z" fill="#EFEDEB"/><ellipse cx="26" cy="30" rx="2.2" ry="2.8" fill="#6B4A40"/><ellipse cx="38" cy="30" rx="2.2" ry="2.8" fill="#6B4A40"/><path d="M27 37q5 5 10 0" stroke="#6B4A40" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>아이톡톡 <small>가격비교</small></h1>
-        <p class="sub"><span class="long">기저귀 <b>1매당</b>·분유 <b>100g당</b> 가격으로 지금이 싼지 비싼지 알려드려요</span><span class="short"><b>1매당·100g당</b> 단가로 싼지 비싼지 확인</span> · <a href="#faq">사용법</a></p>
-        <div class="hero-chips" id="heroChips" aria-label="이 사이트 기준"><span id="heroCount">📦 제품 추적 중</span><span>🚚 배송비 포함</span><span>👤 비회원 가격</span></div>
+        <p class="sub"><span class="long">기저귀 <b>1매당</b>·분유 <b>100g당</b> 가격으로 지금이 싼지 비싼지 알려드려요</span><span class="short">단가로 싼지 비싼지 확인</span> · <a href="#faq">사용법</a></p>
+        <div class="hero-chips" id="heroChips" aria-label="이 사이트 기준"><span id="heroCount">📦 제품 추적 중</span><span>🚚 배송비 포함</span><span>👤 비회원 가격</span><button type="button" id="basisBtn" aria-expanded="false" aria-controls="basisBox"><span>ℹ 기준 보기</span></button></div>
+        <div class="hero-basis" id="basisBox" hidden>
+          <p><b>가격 기준</b> 비회원이 살 때의 <b>배송비 포함 최저가</b>예요. 쿠팡 와우 등 멤버십 혜택, 카드·적립, 조건부 쿠폰은 뺐어요.</p>
+          <p><b>단가 계산</b> <span id="basisEx"></span></p>
+          <p><b>갱신</b> 운영자가 매주 토·일에 판매처를 직접 확인해 기록해요(<span id="basisNext"></span>). 구매 전에는 쇼핑몰에서 한 번 더 확인하세요.</p>
+        </div>
       </div>
       <button id="openGuide" class="gbtn" type="button" aria-haspopup="dialog">👶 월령 가이드</button>
+<svg class="hero-art" viewBox="0 0 240 200" aria-hidden="true" focusable="false">
+<circle cx="120" cy="104" r="86" fill="#fff" opacity=".5"/>
+<defs><linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c6cf0" stop-opacity=".34"/><stop offset="1" stop-color="#7c6cf0" stop-opacity="0"/></linearGradient><linearGradient id="gL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c6cf0"/><stop offset="1" stop-color="#e8643b"/></linearGradient></defs>
+<g fill="#fff" opacity=".6"><rect x="22" y="100" width="13" height="80" rx="6.5"/><rect x="50" y="88" width="13" height="92" rx="6.5"/><rect x="78" y="80" width="13" height="100" rx="6.5"/><rect x="106" y="66" width="13" height="114" rx="6.5"/><rect x="134" y="74" width="13" height="106" rx="6.5"/><rect x="162" y="56" width="13" height="124" rx="6.5"/><rect x="190" y="48" width="13" height="132" rx="6.5"/><rect x="214" y="40" width="13" height="140" rx="6.5"/></g>
+<path d="M8 98C30 94 42 62 68 56S104 72 126 50S164 30 190 42S214 24 226 30V180H8Z" fill="url(#gA)"/>
+<line x1="8" y1="64" x2="228" y2="64" stroke="#e8643b" stroke-width="2.5" stroke-dasharray="3 8" stroke-linecap="round" opacity=".6"/>
+<path d="M8 98C30 94 42 62 68 56S104 72 126 50S164 30 190 42S214 24 226 30" fill="none" stroke="url(#gL)" stroke-width="7" stroke-linecap="round"/>
+<circle cx="226" cy="30" r="17" fill="#e8643b" opacity=".2"/><circle cx="226" cy="30" r="8.5" fill="#e8643b"/><circle cx="226" cy="30" r="3.5" fill="#fff"/>
+<ellipse cx="82" cy="176" rx="48" ry="7" fill="#8f3414" opacity=".13"/>
+<path d="M30 52l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#fff"/>
+<g transform="translate(8 34) scale(2.5)">
+<path d="M18 16h28a8 8 0 0 1 8 8v16a8 8 0 0 1-8 8H31l-9 8v-8h-4a8 8 0 0 1-8-8V24a8 8 0 0 1 8-8z" fill="#fffaf4" stroke="#d8947e" stroke-width="1.5" stroke-linejoin="round"/>
+<ellipse cx="26" cy="30" rx="2.2" ry="2.8" fill="#6B4A40"/><ellipse cx="38" cy="30" rx="2.2" ry="2.8" fill="#6B4A40"/>
+<path d="M27.5 36.5Q32 41 36.5 36.5" fill="none" stroke="#6B4A40" stroke-width="1.8" stroke-linecap="round"/>
+<circle cx="21.5" cy="35" r="2.6" fill="#f4a89a" opacity=".6"/><circle cx="42.5" cy="35" r="2.6" fill="#f4a89a" opacity=".6"/>
+</g>
+<line x1="186" y1="130" x2="216" y2="164" stroke="#e8643b" stroke-width="11" stroke-linecap="round"/>
+<circle cx="164" cy="104" r="40" fill="#fff" fill-opacity=".75" stroke="#e8643b" stroke-width="8"/>
+<polygon points="152,86 176,86 176,102 188,102 164,128 140,102 152,102" fill="#e8643b"/>
+<path d="M142 84a28 28 0 0 1 14-12" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".9"/>
+</svg>
     </div>
   </header>
 
@@ -229,7 +255,7 @@
   </div>
   <iframe name="inqSink" id="inqSink" title="제출 결과" hidden></iframe>
 
-  <script src="js/app.js?v=20261127d"></script>
-  <script src="js/inquiry.js?v=20261127d" defer></script>
+  <script src="js/app.js?v=20261127m"></script>
+  <script src="js/inquiry.js?v=20261127m" defer></script>
 </body>
 </html>

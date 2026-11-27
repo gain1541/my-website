@@ -324,7 +324,6 @@ body{background:linear-gradient(180deg,#fff1ea 0,var(--bg) 380px) no-repeat,var(
   .top::after{right:160px;bottom:-190px;width:340px;height:340px}
 }
 @media (min-width:1200px){
-  .top .wrap{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 330 150'%3E%3Cpath d='M8 110 L60 84 L112 96 L164 58 L216 70 L268 34 L322 52' fill='none' stroke='%237c6cf0' stroke-width='7' stroke-linecap='round' stroke-linejoin='round' opacity='.35'/%3E%3Ccircle cx='322' cy='52' r='11' fill='%23e8643b' opacity='.8'/%3E%3Cline x1='8' y1='78' x2='322' y2='78' stroke='%23e8643b' stroke-width='3' stroke-dasharray='8 7' opacity='.45'/%3E%3C/svg%3E") no-repeat right 250px center/260px 118px}
 }
 
 /* ===== 카테고리(섹션)별 포인트 색 =====
@@ -520,3 +519,28 @@ body[data-cat] .card{overflow:hidden;box-shadow:none;background:var(--card)}
 .foot{background:#efd9ca;color:#4f4c63}
 .foot a{color:#3a384c}
 .listnote,.totals,.count,.asof{color:#4f4c63}
+
+/* 2026-11-27 신뢰 요소: 기준 보기 패널, 배너 그림, 판단 진행 막대 */
+.hero-chips button{background:none;border:0;padding:0 2px;min-height:44px;display:inline-flex;align-items:center;margin:-8px 0}
+.hero-chips button span{background:rgba(255,255,255,.95);border-color:rgba(120,80,60,.3);color:#8f3414;font-weight:800}
+.hero-chips button[aria-expanded="true"] span{background:#8f3414;color:#fff;border-color:#8f3414}
+.hero-chips{align-items:center}
+.hero-basis{grid-column:1/-1;grid-row:4;margin-top:8px;max-width:640px;background:rgba(255,255,255,.82);border:1px solid rgba(120,80,60,.2);border-radius:12px;padding:8px 12px;font-size:.84rem;line-height:1.5;color:#34333f}
+.hero-basis p{margin:2px 0}
+.hero-basis b{color:#8f3414;margin-right:4px}
+/* 배너 그림(마스코트+돋보기, 뒤에 가격 추이 그래프): 모바일은 오른쪽 아래, 큰 화면은 오른쪽 가운데 */
+.hero-art{display:block;overflow:visible;position:absolute;pointer-events:none;z-index:0;height:auto}
+.top .wrap>.hero-art{right:8px;bottom:4px;width:124px}
+.hero-chips,.hero-basis{position:relative;z-index:2}
+@media (max-width:899px){
+  .top .sub,.top .hero-chips{max-width:calc(100% - 130px)}
+  #heroCount{display:none}
+}
+@media (min-width:900px) and (max-width:1199px){.top .wrap>.hero-art{width:190px;right:200px;bottom:auto;top:50%;transform:translateY(-50%)}}
+@media (min-width:1200px){.top .wrap>.hero-art{width:250px;right:200px;bottom:auto;top:50%;transform:translateY(-50%)}}
+.meter{margin:10px 0 2px;font-size:.84rem;color:var(--ink)}
+.meter .mrow{display:flex;align-items:center;gap:8px;margin:4px 0}
+.meter .mrow span:first-child{flex:0 0 5.5em;color:var(--muted)}
+.meter .bar{flex:1;height:8px;border-radius:999px;background:#eadccf;overflow:hidden}
+.meter .bar i{display:block;height:100%;background:var(--cat,var(--accent));border-radius:999px}
+.meter .mrow b{flex:0 0 auto;font-variant-numeric:tabular-nums}
