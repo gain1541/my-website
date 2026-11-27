@@ -528,24 +528,17 @@ body[data-cat] .card{overflow:hidden;box-shadow:none;background:var(--card)}
 .hero-basis{grid-column:1/-1;grid-row:4;margin-top:8px;max-width:640px;background:rgba(255,255,255,.82);border:1px solid rgba(120,80,60,.2);border-radius:12px;padding:8px 12px;font-size:.84rem;line-height:1.5;color:#34333f}
 .hero-basis p{margin:2px 0}
 .hero-basis b{color:#8f3414;margin-right:4px}
-.hero-side{display:none}
-@media (min-width:1200px){
-  .hero-side{display:block;position:absolute;right:210px;top:50%;transform:translateY(-50%);width:270px;pointer-events:none}
-  .hs{display:none;background:rgba(255,255,255,.62);border:1.5px dashed rgba(143,52,20,.45);border-radius:16px;padding:12px 16px;color:#34333f}
-  .hs small{display:block;font-size:.78rem;font-weight:700;color:#6a3a20;letter-spacing:.02em}
-  .top[data-hero="stamp"] .hs-stamp,.top[data-hero="calc"] .hs-calc,.top[data-hero="steps"] .hs-steps{display:block}
-  .hs-stamp{transform:rotate(-3deg);text-align:center;border-radius:18px;padding:14px 16px}
-  .hs-stamp b{display:block;font-size:1.6rem;line-height:1.2;color:#8f3414;letter-spacing:.01em}
-  .hs-stamp span{display:block;margin-top:4px;font-size:.84rem;font-weight:700;color:#4a4860}
-  .hs-calc{border-style:solid;border-color:rgba(143,52,20,.25);background:rgba(255,255,255,.78)}
-  .hs-calc .eq{display:flex;align-items:baseline;justify-content:center;gap:7px;margin:6px 0 4px;font-size:.95rem;font-weight:700;font-variant-numeric:tabular-nums;flex-wrap:wrap}
-  .hs-calc .eq i{font-style:normal;color:#8f3414}
-  .hs-calc .eq b{flex-basis:100%;text-align:center;font-size:1.2rem;color:#8f3414}
-  .hs-calc em{display:block;font-style:normal;font-size:.78rem;color:#4a4860;text-align:center}
-  .hs-steps ol{list-style:none;margin:6px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
-  .hs-steps li{background:rgba(255,255,255,.85);border-radius:999px;padding:4px 10px;font-size:.82rem;font-weight:700;counter-increment:st}
-  .hs-steps li::before{content:"✓ ";color:#8f3414}
+/* 배너 그림(글자 없는 일러스트 3안, header.top[data-hero]로 선택): 모바일은 오른쪽 아래, 큰 화면은 오른쪽 가운데 */
+.hero-art{display:none;position:absolute;pointer-events:none;z-index:0;height:auto}
+.top[data-hero="items"] .hero-art[data-art="items"],.top[data-hero="mascot"] .hero-art[data-art="mascot"],.top[data-hero="mobile"] .hero-art[data-art="mobile"]{display:block}
+.top .wrap>.hero-art{right:8px;bottom:4px;width:124px}
+.hero-chips,.hero-basis{position:relative;z-index:2}
+@media (max-width:899px){
+  .top .sub,.top .hero-chips{max-width:calc(100% - 130px)}
+  #heroCount{display:none}
 }
+@media (min-width:900px) and (max-width:1199px){.top .wrap>.hero-art{width:190px;right:200px;bottom:auto;top:50%;transform:translateY(-50%)}}
+@media (min-width:1200px){.top .wrap>.hero-art{width:250px;right:200px;bottom:auto;top:50%;transform:translateY(-50%)}}
 .meter{margin:10px 0 2px;font-size:.84rem;color:var(--ink)}
 .meter .mrow{display:flex;align-items:center;gap:8px;margin:4px 0}
 .meter .mrow span:first-child{flex:0 0 5.5em;color:var(--muted)}

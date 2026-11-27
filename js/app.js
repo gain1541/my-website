@@ -161,7 +161,7 @@
     if (ex && !ex.a.none) {
       const exTxt = `${ex.qty}${ex.unit} ${won(packPrice(ex, ex.a.cur))} ÷ ${ex.qty}${ex.unit} = ${unitLabel(ex)} ${fmtU(ex.a.cur)}원 (${ex.name})`;
       $('#basisEx').textContent = exTxt;
-      $('#hcA').textContent = won(packPrice(ex, ex.a.cur)); $('#hcB').textContent = `${ex.qty}${ex.unit}`; $('#hcC').textContent = `= ${unitLabel(ex)} ${fmtU(ex.a.cur)}원`;
+      
     } else { $('#basisEx').textContent = '총 가격 ÷ 수량 = 1매당(100g당) 가격'; }
     $('#basisBtn').addEventListener('click', () => {
       const box = $('#basisBox'), on = box.hidden; box.hidden = !on; $('#basisBtn').setAttribute('aria-expanded', String(on));
@@ -173,8 +173,7 @@
       const nx = new Date(base); nx.setDate(base.getDate() + (wd === 6 ? 1 : (6 - wd + 7) % 7 || 7));
       let ng = nx; const t0 = new Date(); t0.setHours(0, 0, 0, 0);
       while (ng < t0) ng = new Date(ng.getTime() + 7 * DAY); // 이미 지났으면 다음 주기로
-      $('#hsDate').textContent = `${lm}/${ld}`;
-      $('#hsNext').textContent = `다음 갱신 ${ng.getMonth() + 1}/${ng.getDate()}(${'일월화수목금토'[ng.getDay()]})`;
+      $('#basisNext').textContent = `다음 갱신 ${ng.getMonth() + 1}/${ng.getDate()}(${'일월화수목금토'[ng.getDay()]})`;
     }
     $('#totals').textContent = `전체 ${DB.products.length}개 · 가격 확인 ${DB.products.filter((p) => !p.a.none).length}개`;
     const savedCat = store.get('cat');

@@ -19,27 +19,75 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22%3E%3Crect width=%2264%22 height=%2264%22 rx=%2215%22 fill=%22%23D8947E%22/%3E%3Cpath d=%22M18 16h28a8 8 0 0 1 8 8v16a8 8 0 0 1-8 8H31l-9 8v-8h-4a8 8 0 0 1-8-8V24a8 8 0 0 1 8-8z%22 fill=%22%23EFEDEB%22/%3E%3Cellipse cx=%2226%22 cy=%2230%22 rx=%222.2%22 ry=%222.8%22 fill=%22%236B4A40%22/%3E%3Cellipse cx=%2238%22 cy=%2230%22 rx=%222.2%22 ry=%222.8%22 fill=%22%236B4A40%22/%3E%3Cpath d=%22M27 37q5 5 10 0%22 stroke=%22%236B4A40%22 stroke-width=%222.4%22 fill=%22none%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
   <link rel="apple-touch-icon" href="img/icon-180.png">
   <meta name="description" content="아이톡톡 가격비교: 기저귀·분유·쪽쪽이·젖병 등 육아용품의 시장 최저 단가 추이를 보고, 지금 가격이 싼지 비싼지 확인하세요.">
-  <link rel="stylesheet" href="css/style.css?v=20261127h">
+  <link rel="stylesheet" href="css/style.css?v=20261127j">
 </head>
 <body>
-  <header class="top" data-hero="stamp">
+  <header class="top" data-hero="items">
     <div class="wrap top-in">
       <div>
         <h1><svg class="logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#D8947E"/><path d="M18 16h28a8 8 0 0 1 8 8v16a8 8 0 0 1-8 8H31l-9 8v-8h-4a8 8 0 0 1-8-8V24a8 8 0 0 1 8-8z" fill="#EFEDEB"/><ellipse cx="26" cy="30" rx="2.2" ry="2.8" fill="#6B4A40"/><ellipse cx="38" cy="30" rx="2.2" ry="2.8" fill="#6B4A40"/><path d="M27 37q5 5 10 0" stroke="#6B4A40" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>아이톡톡 <small>가격비교</small></h1>
-        <p class="sub"><span class="long">기저귀 <b>1매당</b>·분유 <b>100g당</b> 가격으로 지금이 싼지 비싼지 알려드려요</span><span class="short"><b>1매당·100g당</b> 단가로 싼지 비싼지 확인</span> · <a href="#faq">사용법</a></p>
+        <p class="sub"><span class="long">기저귀 <b>1매당</b>·분유 <b>100g당</b> 가격으로 지금이 싼지 비싼지 알려드려요</span><span class="short">단가로 싼지 비싼지 확인</span> · <a href="#faq">사용법</a></p>
         <div class="hero-chips" id="heroChips" aria-label="이 사이트 기준"><span id="heroCount">📦 제품 추적 중</span><span>🚚 배송비 포함</span><span>👤 비회원 가격</span><button type="button" id="basisBtn" aria-expanded="false" aria-controls="basisBox"><span>ℹ 기준 보기</span></button></div>
         <div class="hero-basis" id="basisBox" hidden>
           <p><b>가격 기준</b> 비회원이 살 때의 <b>배송비 포함 최저가</b>예요. 쿠팡 와우 등 멤버십 혜택, 카드·적립, 조건부 쿠폰은 뺐어요.</p>
           <p><b>단가 계산</b> <span id="basisEx"></span></p>
-          <p><b>갱신</b> 운영자가 매주 토·일에 판매처를 직접 확인해 기록해요. 구매 전에는 쇼핑몰에서 한 번 더 확인하세요.</p>
+          <p><b>갱신</b> 운영자가 매주 토·일에 판매처를 직접 확인해 기록해요(<span id="basisNext"></span>). 구매 전에는 쇼핑몰에서 한 번 더 확인하세요.</p>
         </div>
       </div>
       <button id="openGuide" class="gbtn" type="button" aria-haspopup="dialog">👶 월령 가이드</button>
-      <aside class="hero-side" aria-label="가격 확인 안내">
-        <div class="hs hs-stamp"><small>가격 확인일</small><b id="hsDate">-</b><span id="hsNext"></span></div>
-        <div class="hs hs-calc"><small>이렇게 계산해요</small><div class="eq"><span id="hcA">-</span><i>÷</i><span id="hcB">-</span><b id="hcC">-</b></div><em>배송비 포함 · 비회원 가격</em></div>
-        <div class="hs hs-steps"><small>가격이 나오는 과정</small><ol><li>판매처 확인</li><li>배송비 포함</li><li>단가로 환산</li><li>평균과 비교</li></ol></div>
-      </aside>
+<svg class="hero-art" data-art="items" viewBox="0 0 240 200" aria-hidden="true" focusable="false">
+<circle cx="122" cy="106" r="86" fill="#fff" opacity=".5"/>
+<path d="M40 36l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill="#fff" opacity=".95"/>
+<path d="M214 150l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#fff" opacity=".95"/>
+<g transform="translate(56 46)">
+<path d="M20 8C20 -4 36 -4 36 8Z" fill="#f4a77f"/>
+<rect x="12" y="8" width="32" height="12" rx="5" fill="#e8643b"/>
+<rect x="8" y="18" width="40" height="88" rx="15" fill="#fff" stroke="#d8947e" stroke-width="3"/>
+<path d="M10 62h36v28a14 14 0 0 1-14 14H24a14 14 0 0 1-14-14z" fill="#ffd9c4"/>
+<g stroke="#d8947e" stroke-width="3" stroke-linecap="round"><path d="M32 34h9M32 46h6M32 58h9"/></g>
+</g>
+<g transform="translate(118 98)">
+<path d="M0 7Q0 0 7 0H69Q76 0 76 7V26Q76 54 38 60Q0 54 0 26Z" fill="#b9a8ff"/>
+<path d="M0 7Q0 0 7 0H69Q76 0 76 7V16H0Z" fill="#8f7cf0"/>
+<rect x="-7" y="3" width="15" height="11" rx="4" fill="#fff" opacity=".92"/><rect x="68" y="3" width="15" height="11" rx="4" fill="#fff" opacity=".92"/>
+<path d="M38 48C28 41 26 32 32 30C35.5 29 38 31 38 34C38 31 40.5 29 44 30C50 32 48 41 38 48Z" fill="#fff" opacity=".92"/>
+</g>
+<g transform="translate(36 148)">
+<ellipse cx="0" cy="0" rx="25" ry="15" fill="#9dbdf5"/>
+<circle cx="0" cy="0" r="6" fill="#dbe9ff"/>
+<circle cx="0" cy="-24" r="12" fill="none" stroke="#6a8fe0" stroke-width="5"/>
+<path d="M-8 12Q0 36 8 12Z" fill="#f4a77f"/>
+</g>
+<g transform="translate(172 24) rotate(14) scale(1)"><path d="M10 0H44a8 8 0 0 1 8 8V40a8 8 0 0 1-8 8H10L-8 24Z" fill="#e8643b"/><circle cx="4" cy="24" r="4" fill="#ffe3d6"/><polygon points="22,15 38,15 38,25 44,25 30,38 16,25 22,25" fill="#fff"/></g>
+</svg>
+<svg class="hero-art" data-art="mascot" viewBox="0 0 240 200" aria-hidden="true" focusable="false">
+<circle cx="120" cy="104" r="86" fill="#fff" opacity=".5"/>
+<ellipse cx="82" cy="176" rx="48" ry="7" fill="#8f3414" opacity=".13"/>
+<path d="M214 40l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#fff"/>
+<path d="M30 52l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#fff"/>
+<g transform="translate(8 34) scale(2.5)">
+<path d="M18 16h28a8 8 0 0 1 8 8v16a8 8 0 0 1-8 8H31l-9 8v-8h-4a8 8 0 0 1-8-8V24a8 8 0 0 1 8-8z" fill="#fffaf4" stroke="#d8947e" stroke-width="1.5" stroke-linejoin="round"/>
+<ellipse cx="26" cy="30" rx="2.2" ry="2.8" fill="#6B4A40"/><ellipse cx="38" cy="30" rx="2.2" ry="2.8" fill="#6B4A40"/>
+<path d="M27.5 36.5Q32 41 36.5 36.5" fill="none" stroke="#6B4A40" stroke-width="1.8" stroke-linecap="round"/>
+<circle cx="21.5" cy="35" r="2.6" fill="#f4a89a" opacity=".6"/><circle cx="42.5" cy="35" r="2.6" fill="#f4a89a" opacity=".6"/>
+</g>
+<line x1="186" y1="130" x2="216" y2="164" stroke="#e8643b" stroke-width="11" stroke-linecap="round"/>
+<circle cx="164" cy="104" r="40" fill="#fff" fill-opacity=".75" stroke="#e8643b" stroke-width="8"/>
+<polygon points="152,86 176,86 176,102 188,102 164,128 140,102 152,102" fill="#e8643b"/>
+<path d="M142 84a28 28 0 0 1 14-12" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".9"/>
+</svg>
+<svg class="hero-art" data-art="mobile" viewBox="0 0 240 200" aria-hidden="true" focusable="false">
+<path d="M26 18H214" stroke="#c98a6e" stroke-width="6" stroke-linecap="round"/>
+<path d="M120 4V18" stroke="#c98a6e" stroke-width="5" stroke-linecap="round"/>
+<g stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".95"><path d="M54 18V70"/><path d="M104 18V112"/><path d="M152 18V58"/><path d="M200 18V94"/></g>
+<g transform="translate(54 86)"><polygon points="0,-17 4.6,-6.4 16.2,-5.3 7.5,2.5 10,13.8 0,8 -10,13.8 -7.5,2.5 -16.2,-5.3 -4.6,-6.4" fill="#ffd666" stroke="#ffd666" stroke-width="5" stroke-linejoin="round"/></g>
+<g transform="translate(104 134)"><path d="M10 -22A24 24 0 1 0 10 22A18 18 0 1 1 10 -22Z" fill="#b9a8ff" stroke="#b9a8ff" stroke-width="4" stroke-linejoin="round"/><circle cx="-3" cy="-2" r="2" fill="#6B4A40"/><path d="M-9 8Q-4 12 0 8" fill="none" stroke="#6B4A40" stroke-width="2" stroke-linecap="round"/></g>
+<g transform="translate(152 80)"><g fill="#fff"><circle cx="-18" cy="6" r="14"/><circle cx="0" cy="-6" r="19"/><circle cx="20" cy="4" r="14"/><rect x="-24" y="4" width="54" height="16" rx="8"/></g></g>
+<g transform="translate(188 98) rotate(-8) scale(0.85)"><path d="M10 0H44a8 8 0 0 1 8 8V40a8 8 0 0 1-8 8H10L-8 24Z" fill="#e8643b"/><circle cx="4" cy="24" r="4" fill="#ffe3d6"/><polygon points="22,15 38,15 38,25 44,25 30,38 16,25 22,25" fill="#fff"/></g>
+<path d="M30 160l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#fff" opacity=".95"/>
+<path d="M214 168l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#fff" opacity=".95"/>
+<circle cx="70" cy="170" r="5" fill="#fff" opacity=".8"/><circle cx="168" cy="176" r="4" fill="#fff" opacity=".8"/>
+</svg>
     </div>
   </header>
 
@@ -239,7 +287,7 @@
   </div>
   <iframe name="inqSink" id="inqSink" title="제출 결과" hidden></iframe>
 
-  <script src="js/app.js?v=20261127h"></script>
-  <script src="js/inquiry.js?v=20261127h" defer></script>
+  <script src="js/app.js?v=20261127j"></script>
+  <script src="js/inquiry.js?v=20261127j" defer></script>
 </body>
 </html>
