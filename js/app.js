@@ -416,15 +416,22 @@
     }).join('');
   }
 
-  // 날짜 축 기준 미니 그래프
-  function spark(h, w = 220, ht = 34) {
-    const t0 = Date.parse(h[0].d), t1 = Date.parse(h[h.length - 1].d);
+  // 기록 사이를 부드럽게 이은 곡선(두 점 사이도 완만한 S자). 점이 적을 땐 직선처럼 뻣뻣해 보이지 않게
+  function smoothPath(pts) {
+    return pts.map((q, i) => {
+      if (!i) return `M${q[0].toFixed(1)} ${q[1].toFixed(1)}`;
+      const p = pts[i - 1], mx = (p[0] + q[0]) / 2;
+      return `C${mx.toFixed(1)} ${p[1].toFixed(1)} ${mx.toFixed(1)} ${q[1].toFixed(1)} ${q[0].toFixed(1)} ${q[1].toFixed(1)}`;
+    }).join(' ');
+  }
+  // 카드 미니 그래프: 날짜 축 기준, 끝점이 잘리지 않게 여백을 둠
+  function spark(h, w = 120, ht = 40) {
+    const t0 = Date.parse(h[0].d), t1 = Date.parse(h[h.length - 1].d), px = 9, py = 9;
     const vs = h.map((x) => x.u);
     const lo = Math.min(...vs), hi = Math.max(...vs), rng = hi - lo || 1;
-    const pts = h.map((x) => [t1 > t0 ? ((Date.parse(x.d) - t0) / (t1 - t0)) * w : w / 2, ht - 4 - ((x.u - lo) / rng) * (ht - 8)]);
-    const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-    const last = pts[pts.length - 1];
-    return `<svg class="spark" viewBox="0 0 ${w} ${ht}" preserveAspectRatio="none" aria-hidden="true"><path d="${d}" fill="none" stroke="#9b8cff" stroke-width="2" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="#ff8a65"/></svg>`;
+    const pts = h.map((x) => [t1 > t0 ? px + ((Date.parse(x.d) - t0) / (t1 - t0)) * (w - px * 2) : w / 2, ht - py - ((x.u - lo) / rng) * (ht - py * 2)]);
+    const d = smoothPath(pts), first = pts[0], last = pts[pts.length - 1];
+    return `<svg class="spark" viewBox="0 0 ${w} ${ht}" aria-hidden="true"><path d="${d} L${last[0].toFixed(1)} ${ht} L${first[0].toFixed(1)} ${ht}Z" fill="rgba(155,140,255,.2)"/><path d="${d}" fill="none" stroke="#8a78f2" stroke-width="2.6" stroke-linecap="round"/><circle cx="${first[0].toFixed(1)}" cy="${first[1].toFixed(1)}" r="3.2" fill="#fff" stroke="#8a78f2" stroke-width="2"/><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="7" fill="#ff8a65" opacity=".25"/><circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="4" fill="#ff8a65"/></svg>`;
   }
 
 
@@ -628,32 +635,45 @@
   }
 
   function chart(a) {
-    const W = 640, H = 240, L = 52, R = 12, T = 12, B = 28;
+    const W = 640, H = 300, L = 70, R = 44, T = 44, B = 44;
     const h = a.h;
     const t0 = Date.parse(h[0].d), t1 = Date.parse(h[h.length - 1].d);
-    const lo = Math.min(a.min, a.avg) * 0.97, hi = a.max * 1.03, rng = hi - lo || 1;
+    // 값이 거의 안 변해도 작은 변동이 과장돼 보이지 않게 평균의 ±4% 이상 범위를 보장
+    let lo = Math.min(a.min, a.avg, a.avg * 0.96), hi = Math.max(a.max, a.avg, a.avg * 1.04);
+    const ex = (hi - lo) * 0.1; lo -= ex; hi += ex;
+    const rng = hi - lo || 1;
     const x = (d) => (t1 > t0 ? L + ((Date.parse(d) - t0) / (t1 - t0)) * (W - L - R) : (L + W - R) / 2);
     const y = (v) => T + (1 - (v - lo) / rng) * (H - T - B);
-    const d = h.map((p, k) => (k ? 'L' : 'M') + x(p.d).toFixed(1) + ' ' + y(p.u).toFixed(1)).join(' ');
+    const pts = h.map((q) => [x(q.d), y(q.u)]);
+    const d = smoothPath(pts), first = pts[0], last = pts[pts.length - 1];
     let grid = '';
     for (let k = 0; k <= 3; k++) {
       const v = lo + (rng * k) / 3;
-      grid += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#eadfda" stroke-dasharray="3 3"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end" font-size="12" fill="#68657a">${fmtU(v)}</text>`;
+      grid += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#eadfda" stroke-dasharray="3 5"/><text x="${L - 10}" y="${y(v) + 7}" text-anchor="end" font-size="20" fill="#5f5c73">${fmtU(v)}</text>`;
     }
-    const minP = h.find((p) => p.u === a.min);
-    const lastP = h[h.length - 1];
-    const ticks = uniq([h[0].d, lastP.d]);
-    const xt = ticks.map((dt, i) => `<text x="${x(dt)}" y="${H - 8}" text-anchor="${ticks.length === 1 ? 'middle' : i === 0 ? 'start' : 'end'}" font-size="12" fill="#68657a">${dt.slice(2)}</text>`).join('');
-    const dots = h.map((p) => `<circle cx="${x(p.d)}" cy="${y(p.u)}" r="3" fill="#7c6cf0"/>`).join('');
+    const lastP = h[h.length - 1], firstP = h[0];
+    const ticks = uniq([firstP.d, lastP.d]);
+    const xt = ticks.map((dt, i) => `<text x="${x(dt)}" y="${H - 10}" text-anchor="${ticks.length === 1 ? 'middle' : i === 0 ? 'start' : 'end'}" font-size="20" fill="#5f5c73">${md(dt)}</text>`).join('');
+    // 값 라벨: 처음·마지막(점이 3개 이상이면 최저점도). 위·아래 공간을 보고 겹치지 않게
+    const lab = (q, v, anchor, dy) => `<text x="${q[0]}" y="${q[1] + dy}" text-anchor="${anchor}" font-size="22" font-weight="700" fill="#34333f">${fmtU(v)}원</text>`;
+    let labels = lab(first, firstP.u, first[0] < L + 20 ? 'start' : 'middle', first[1] > y(a.avg) ? 32 : -16) + lab(last, lastP.u, 'end', last[1] > y(a.avg) ? 32 : -20);
+    let minDot = '';
+    if (h.length >= 3) {
+      const mp = h.find((q) => q.u === a.min), mq = [x(mp.d), y(mp.u)];
+      if (mp !== firstP && mp !== lastP) { minDot = `<circle cx="${mq[0]}" cy="${mq[1]}" r="5" fill="#fff" stroke="#8a78f2" stroke-width="3"/>` + lab(mq, mp.u, 'middle', 32); }
+    }
+    const dots = h.slice(1, -1).map((q) => `<circle cx="${x(q.d)}" cy="${y(q.u)}" r="3.5" fill="#fff" stroke="#8a78f2" stroke-width="2.5"/>`).join('');
     return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="단가 추이 그래프">
+      <defs><linearGradient id="cgA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c6cf0" stop-opacity=".3"/><stop offset="1" stop-color="#7c6cf0" stop-opacity="0"/></linearGradient><linearGradient id="cgL" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7c6cf0"/><stop offset="1" stop-color="#e8643b"/></linearGradient></defs>
       ${grid}
-      <line x1="${L}" x2="${W - R}" y1="${y(a.avg)}" y2="${y(a.avg)}" stroke="#e8643b" stroke-dasharray="5 4"/>
-      <text x="${W - R}" y="${y(a.avg) - 5}" text-anchor="end" font-size="12" fill="#e8643b">평균 ${fmtU(a.avg)}원</text>
-      <path d="${d}" fill="none" stroke="#7c6cf0" stroke-width="2.4" stroke-linejoin="round"/>
-      ${dots}
-      <circle cx="${x(minP.d)}" cy="${y(minP.u)}" r="5" fill="#23805f"/>
-      <circle cx="${x(lastP.d)}" cy="${y(lastP.u)}" r="5.5" fill="#e8643b"/>
-      ${xt}
+      <line x1="${L}" x2="${W - R}" y1="${y(a.avg)}" y2="${y(a.avg)}" stroke="#e8643b" stroke-width="1.5" stroke-dasharray="5 4" opacity=".7"/>
+      <text x="${W - R}" y="${y(a.avg) + (last[1] > y(a.avg) ? -8 : 24)}" text-anchor="end" font-size="20" fill="#b4431f">평균 ${fmtU(a.avg)}원</text>
+      <path d="${d} L${last[0].toFixed(1)} ${H - B} L${first[0].toFixed(1)} ${H - B}Z" fill="url(#cgA)"/>
+      <path d="${d}" fill="none" stroke="url(#cgL)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      ${dots}${minDot}
+      <circle cx="${first[0]}" cy="${first[1]}" r="7" fill="#fff" stroke="#7c6cf0" stroke-width="4"/>
+      <circle cx="${last[0]}" cy="${last[1]}" r="16" fill="#e8643b" opacity=".2"/><circle cx="${last[0]}" cy="${last[1]}" r="6.5" fill="#e8643b"/><circle cx="${last[0]}" cy="${last[1]}" r="2.5" fill="#fff"/>
+      ${labels}${xt}
     </svg>`;
   }
 
