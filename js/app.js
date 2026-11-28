@@ -166,15 +166,20 @@
     $('#basisBtn').addEventListener('click', () => {
       const box = $('#basisBox'), on = box.hidden; box.hidden = !on; $('#basisBtn').setAttribute('aria-expanded', String(on));
     });
-    // 다음 갱신일: 토요일 갱신 직후엔 일요일, 그 외엔 다음 토요일(주간 갱신 일정: 토 기저귀·분유·쪽쪽이 / 일 나머지)
-    const lastD = DB.products.flatMap((x) => (x.history || []).map((r) => r.d)).sort().pop();
-    if (lastD) {
-      const [ly, lm, ld] = lastD.split('-').map(Number), base = new Date(ly, lm - 1, ld), wd = base.getDay();
-      const nx = new Date(base); nx.setDate(base.getDate() + (wd === 6 ? 1 : (6 - wd + 7) % 7 || 7));
-      let ng = nx; const t0 = new Date(); t0.setHours(0, 0, 0, 0);
-      while (ng < t0) ng = new Date(ng.getTime() + 7 * DAY); // 이미 지났으면 다음 주기로
-      $('#basisNext').textContent = `다음 갱신 ${ng.getMonth() + 1}/${ng.getDate()}(${'일월화수목금토'[ng.getDay()]})`;
-    }
+    // 다음 갱신일: 카테고리별 갱신 요일(토: 기저귀·분유·쪽쪽이 / 일: 젖병·젖꼭지·기타)에 맞춰, 마지막 기록일 + 6일 이후 첫 해당 요일.
+    // 미리 갱신했으면 그 다음 주기로 계산하고, 가장 빠른 날짜 하나를 보여준다.
+    const UPD = { diaper: 6, formula: 6, pacifier: 6, bottle: 0, nipple: 0, etc: 0 };
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    let ng = null;
+    Object.keys(UPD).forEach((c) => {
+      const ds = DB.products.filter((x) => x.cat === c).flatMap((x) => (x.history || []).map((r) => r.d)).sort();
+      if (!ds.length) return;
+      const [y, mo, dd] = ds[ds.length - 1].split('-').map(Number);
+      let cand = new Date(y, mo - 1, dd + 6);
+      while (cand.getDay() !== UPD[c] || cand < t0) cand = new Date(cand.getFullYear(), cand.getMonth(), cand.getDate() + 1);
+      if (!ng || cand < ng) ng = cand;
+    });
+    if (ng) $('#basisNext').textContent = `다음 갱신 ${ng.getMonth() + 1}/${ng.getDate()}(${'일월화수목금토'[ng.getDay()]})`;
     $('#totals').textContent = `전체 ${DB.products.length}개 · 가격 확인 ${DB.products.filter((p) => !p.a.none).length}개`;
     const savedCat = store.get('cat');
     if (CATS.some((c) => c.id === savedCat)) state.cat = savedCat;
