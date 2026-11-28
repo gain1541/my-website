@@ -86,7 +86,7 @@ details[open]>summary::after{content:"▴"}
 .diff{font-size:.85rem;font-weight:700}
 .diff.cheap{color:var(--cheap)}.diff.pricey{color:var(--pricey)}.diff.normal{color:var(--normal)}.diff.pending{color:var(--pend)}
 .low{font-size:.78rem;color:var(--cheap);font-weight:700}
-svg.spark{width:42%;max-width:130px;height:34px;flex:0 0 auto}
+svg.spark{width:42%;max-width:130px;height:auto;aspect-ratio:3/1;flex:0 0 auto;overflow:visible}
 .mini{font-size:.85rem;color:#2a5bc0;font-weight:700;text-decoration:none;padding:8px 0 8px 10px;white-space:nowrap}
 .card.nodata{background:#fffdfb}
 
